@@ -1,0 +1,322 @@
+<div class="caisse-layout">
+  <!-- Catalogue -->
+  <main class="catalogue">
+    <div class="cat-header">
+      <div class="search-bar">
+        <span>🔍</span>
+        <input
+          type="text"
+          placeholder="Rechercher…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </div>
+      <div class="heure-chip">{{ heure }}</div>
+    </div>
+
+    <div class="cat-chips">
+      @for (c of categories; track c) {
+        <button [class.active]="catActive() === c" (click)="catActive.set(c)">
+          {{ c }}
+        </button>
+      }
+    </div>
+
+    <div class="produits-grid">
+      @for (p of produitsFiltres(); track p.id) {
+        <div
+          class="prod-card"
+          [class.in-cart]="qtyDansPanier(p.id) > 0"
+          [class.rupture]="p.stock === 0"
+          (click)="addProduit(p)"
+        >
+          <div class="pc-ico">{{ p.icone }}</div>
+          <div class="pc-nom">{{ p.nom }}</div>
+          <div class="pc-cat">{{ p.categorie }}</div>
+          <div class="pc-prix">{{ fmtCFA(p.prix) }}</div>
+          <div class="pc-stock" [class.low]="p.stock < 10">{{ p.stock }} rest.</div>
+          @if (qtyDansPanier(p.id) > 0) {
+            <div class="pc-badge">{{ qtyDansPanier(p.id) }}</div>
+          }
+        </div>
+      }
+    </div>
+  </main>
+
+  <!-- Panier desktop -->
+  <aside class="panier">
+    <div class="pan-head">
+      <h3>Commande en cours</h3>
+      <span class="pan-count">{{ nbArticles() }} art.</span>
+    </div>
+
+    <!-- ══════════ SÉLECTEUR TYPE DE VENTE ══════════ -->
+    <div class="type-vente">
+      <button
+        class="tv-btn"
+        [class.active]="typeVente() === 'caisse'"
+        (click)="changerTypeVente('caisse')"
+      >
+        <span>🧾</span>
+        <span>Vente Directe</span>
+      </button>
+      <button
+        class="tv-btn"
+        [class.active]="typeVente() === 'table'"
+        (click)="changerTypeVente('table')"
+      >
+        <span>🪑</span>
+        <span>En cours (Table)</span>
+      </button>
+    </div>
+
+    <!-- ══════════ SÉLECTEUR TABLE ══════════ -->
+    @if (typeVente() === 'table') {
+      <div class="table-section">
+        <div class="table-label">Choisir une table :</div>
+        <div class="table-select-wrapper">
+          <select
+            class="table-select"
+            [ngModel]="tableActive()"
+            (ngModelChange)="selectTable($event)"
+          >
+            <option [ngValue]="null" disabled selected>Sélectionnez une table...</option>
+            @for (t of tablesActives(); track t.id) {
+              <option [ngValue]="t.id" [disabled]="t.active && tableActive() !== t.id">
+                {{ t.nom }} {{ t.active && tableActive() !== t.id ? '(occupée)' : '' }}
+              </option>
+            }
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+
+        @if (tableActive()) {
+          <div class="table-info">
+            <span class="table-info-icon">🪑</span>
+            <div>
+              <span class="table-info-nom">{{ getTableNom(tableActive()!) }}</span>
+              @if (nomClient()) {
+                <span class="table-info-client">Client : {{ nomClient() }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Champ nom client optionnel -->
+        <div class="client-input">
+          <label>Nom du client (optionnel)</label>
+          <input
+            type="text"
+            placeholder="Ex: M. Diop"
+            [ngModel]="nomClient()"
+            (ngModelChange)="nomClient.set($event)"
+            (blur)="sauvegarderPanierActuel()"
+          />
+        </div>
+      </div>
+    }
+
+    @if (flashSucces()) {
+      <div class="succes-flash">✅ Encaissement réussi !</div>
+    }
+
+    <!-- ══════════ LIGNES PANIER (Zone la plus importante) ══════════ -->
+    <div class="pan-lines">
+      @if (panier().length === 0) {
+        <div class="pan-vide">
+          <span>🛒</span>
+          <p>Panier vide</p>
+        </div>
+      }
+      @for (l of panier(); track l.produit.id) {
+        <div class="pan-line">
+          <span class="pl-ico">{{ l.produit.icone }}</span>
+          <div class="pl-info">
+            <span>{{ l.produit.nom }}</span>
+            <small>{{ fmtCFA(l.produit.prix) }}/u.</small>
+          </div>
+          <div class="pl-qty">
+            <button (click)="changeQty(l.produit.id, -1)">−</button>
+            <span>{{ l.quantite }}</span>
+            <button (click)="changeQty(l.produit.id, +1)">+</button>
+          </div>
+          <span class="pl-tot">{{ fmtCFA(l.sousTotal) }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="pan-pay">
+      <div class="pay-lbl">Mode de paiement</div>
+      <div class="pay-modes">
+        @for (m of modesPaiement; track m.id) {
+          <button [class.active]="modePay() === m.id" (click)="modePay.set(m.id)">
+            <span>{{ m.ico }}</span>
+            <span>{{ m.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="pan-footer">
+      @if (panier().length > 0) {
+        <div class="pf-row">
+          <span>Sous-total</span>
+          <span>{{ fmtCFA(total()) }}</span>
+        </div>
+        <div class="pf-row tva">
+          <span>TVA 18%</span>
+          <span>{{ fmtCFA(Math.round(total() * 0.18)) }}</span>
+        </div>
+      }
+      <div class="pf-ttc">
+        <span>Total TTC</span>
+        <span>{{ fmtCFA(totalTTC()) }}</span>
+      </div>
+      <button class="btn-encaisser" [disabled]="panier().length === 0" (click)="encaisser()">
+        💰 Encaisser
+      </button>
+      @if (panier().length > 0) {
+        <button class="btn-vider" (click)="viderPanier()">Vider le panier</button>
+      }
+    </div>
+  </aside>
+</div>
+
+<!-- FAB Panier mobile -->
+@if (panier().length > 0) {
+  <div class="fab-panier" (click)="panierOpen.set(true)">
+    <span>🛒</span>
+    <span class="fab-nb">{{ nbArticles() }} article(s)</span>
+    <span class="fab-total">{{ fmtCFA(total()) }}</span>
+    <span class="fab-arrow">▲</span>
+  </div>
+}
+
+<!-- Drawer Panier mobile -->
+@if (panierOpen()) {
+  <div class="drawer-bg" (click)="panierOpen.set(false)"></div>
+  <div class="panier-drawer">
+    <div class="dr-handle"></div>
+    <div class="pan-head">
+      <h3>Commande en cours</h3>
+      <button class="btn-close-drawer" (click)="panierOpen.set(false)">✕</button>
+    </div>
+    <!-- ══════════ SÉLECTEUR TYPE DE VENTE ══════════ -->
+    <div class="type-vente">
+      <button
+        class="tv-btn"
+        [class.active]="typeVente() === 'caisse'"
+        (click)="changerTypeVente('caisse')"
+      >
+        <span>🧾</span>
+        <span>Vente Directe</span>
+      </button>
+      <button
+        class="tv-btn"
+        [class.active]="typeVente() === 'table'"
+        (click)="changerTypeVente('table')"
+      >
+        <span>🪑</span>
+        <span>En cours (Table)</span>
+      </button>
+    </div>
+    <!-- ══════════ SÉLECTEUR TABLE ══════════ -->
+    @if (typeVente() === 'table') {
+      <div class="table-section">
+        <div class="table-label">Choisir une table :</div>
+        <div class="table-select-wrapper">
+          <select
+            class="table-select"
+            [ngModel]="tableActive()"
+            (ngModelChange)="selectTable($event)"
+          >
+            <option [ngValue]="null" disabled selected>Sélectionnez une table...</option>
+            @for (t of tablesActives(); track t.id) {
+              <option [ngValue]="t.id" [disabled]="t.active && tableActive() !== t.id">
+                {{ t.nom }} {{ t.active && tableActive() !== t.id ? '(occupée)' : '' }}
+              </option>
+            }
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+
+        <!-- Champ nom client optionnel -->
+        <div class="client-input">
+          <label>Nom du client (optionnel)</label>
+          <input
+            type="text"
+            placeholder="Ex: M. Diop"
+            [ngModel]="nomClient()"
+            (ngModelChange)="nomClient.set($event)"
+            (blur)="sauvegarderPanierActuel()"
+          />
+        </div>
+      </div>
+    }
+    <div class="pan-lines scrollable">
+      @for (l of panier(); track l.produit.id) {
+        <div class="pan-line">
+          <span class="pl-ico">{{ l.produit.icone }}</span>
+          <div class="pl-info">
+            <span>{{ l.produit.nom }}</span>
+            <small>{{ fmtCFA(l.produit.prix) }}/u.</small>
+          </div>
+          <div class="pl-qty">
+            <button (click)="changeQty(l.produit.id, -1)">−</button>
+            <span>{{ l.quantite }}</span>
+            <button (click)="changeQty(l.produit.id, +1)">+</button>
+          </div>
+          <span class="pl-tot">{{ fmtCFA(l.sousTotal) }}</span>
+        </div>
+      }
+    </div>
+    <div class="pan-pay">
+      <div class="pay-lbl">Paiement</div>
+      <div class="pay-modes">
+        @for (m of modesPaiement; track m.id) {
+          <button [class.active]="modePay() === m.id" (click)="modePay.set(m.id)">
+            <span>{{ m.ico }}</span>
+            <span>{{ m.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+    <div class="pan-footer pb-safe">
+      <div class="pf-ttc">
+        <span>Total TTC</span>
+        <span>{{ fmtCFA(totalTTC()) }}</span>
+      </div>
+      <button class="btn-encaisser" (click)="encaisser()">
+        💰 Encaisser {{ fmtCFA(totalTTC()) }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Modal confirmation -->
+@if (showModal()) {
+  <div class="modal-bg" (click)="fermerModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="mc-top">
+        <span>🧾</span>
+        <h2>Confirmation</h2>
+        <p>Vérifiez avant de valider</p>
+      </div>
+      <div class="mc-rows">
+        <div>
+          <span>Articles</span><span>{{ nbArticles() }}</span>
+        </div>
+        <div>
+          <span>Montant TTC</span><strong>{{ fmtCFA(totalTTC()) }}</strong>
+        </div>
+        <div>
+          <span>Paiement</span><span>{{ modePay() }}</span>
+        </div>
+      </div>
+      <div class="mc-actions">
+        <button class="btn-secondary" (click)="fermerModal()">Annuler</button>
+        <button class="btn-primary" (click)="valider()">✅ Valider</button>
+      </div>
+    </div>
+  </div>
+}

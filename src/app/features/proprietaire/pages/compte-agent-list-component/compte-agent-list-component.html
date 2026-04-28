@@ -1,0 +1,123 @@
+  <!-- ══ SECTION GÉRANTS ══ -->
+    @if (sectionActive() === 'gerants') {
+      <div class="section-content">
+        <div class="section-toolbar">
+          <div class="stb-stats">
+            <span>{{ gerants().length }} comptes</span>
+            <span class="badge success">{{ actifGerantsCount() }} actifs</span>
+            <span class="badge warning">{{ congeGerantsCount() }} en congé</span>
+          </div>
+          <button class="btn-primary" (click)="showFormGerant.set(true)">+ Nouveau gérant</button>
+        </div>
+
+        <div class="gerants-grid">
+          @for (g of gerants(); track g.id) {
+            <div class="gerant-card card">
+              <div class="gc-header">
+                <div class="gc-ava">{{ g.photo }}</div>
+                <div class="gc-info">
+                  <div class="gc-nom">{{ g.prenom }} {{ g.nom }}</div>
+                  <div class="gc-role">Gérant</div>
+                </div>
+                <span class="badge" [class]="getStatutGerant(g.statut).cls">{{
+                  getStatutGerant(g.statut).label
+                }}</span>
+              </div>
+              <div class="gc-details">
+                <div class="gcd-row">
+                  <span class="gcd-ico">🏪</span><span>{{ g.boulangerie }}</span>
+                </div>
+                <div class="gcd-row">
+                  <span class="gcd-ico">✉️</span><span>{{ g.email }}</span>
+                </div>
+                <div class="gcd-row">
+                  <span class="gcd-ico">📞</span><span>{{ g.telephone }}</span>
+                </div>
+                <div class="gcd-row">
+                  <span class="gcd-ico">📅</span><span>Depuis {{ g.dateEmbauche }}</span>
+                </div>
+              </div>
+              <div class="gc-actions">
+                <button class="btn-secondary btn-sm">🔑 Réinitialiser MDP</button>
+                <button class="btn-secondary btn-sm">✏️ Modifier</button>
+                <button class="btn-danger btn-sm" (click)="supprimerGerant(g.id)">🗑</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+      @if (showFormGerant()) {
+    <div class="modal-overlay" (click)="showFormGerant.set(false)">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>👤 Créer un compte gérant</h3>
+          <button (click)="showFormGerant.set(false)">✕</button>
+        </div>
+        <div class="modal-form">
+          <div class="form-row-2">
+            <div class="form-row">
+              <label>Prénom *</label>
+              <input
+                type="text"
+                [ngModel]="nouveauGerant().prenom"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Nom *</label>
+              <input
+                type="text"
+                [ngModel]="nouveauGerant().nom"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Email *</label>
+            <input
+              type="email"
+              placeholder="prenom.nom@rose.sn"
+              [ngModel]="nouveauGerant().email"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+          <div class="form-row-2">
+            <div class="form-row">
+              <label>Téléphone</label>
+              <input
+                type="tel"
+                [ngModel]="nouveauGerant().telephone"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Date d'embauche</label>
+              <input
+                type="date"
+                [ngModel]="nouveauGerant().dateEmbauche"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Boulangerie assignée</label>
+            <select
+              [ngModel]="nouveauGerant().boulangerieId"
+              (change)="updateGerantBoulangerieId($event)"
+            >
+              <option value="">-- Sélectionner --</option>
+              @for (b of boulangeries(); track b.id) {
+                <option [value]="b.id">{{ b.nom }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showFormGerant.set(false)">Annuler</button>
+          <button class="btn-primary" (click)="ajouterGerant()">✅ Créer le compte</button>
+        </div>
+      </div>
+    </div>
+  }

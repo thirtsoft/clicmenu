@@ -1,0 +1,106 @@
+    <!-- ────────── VUE LIVRAISONS ────────── -->
+    @if (vue() === 'livraisons') {
+      <div class="gd-content">
+        <div class="content-header">
+          <div>
+            <h2>🚚 Suivi des livraisons</h2>
+            <p>{{ ds.livraisons.length }} livraisons aujourd'hui</p>
+          </div>
+        </div>
+
+        <div class="kpis-4">
+          <div class="kpi-card kc-rose">
+            <div class="kc-top"><span class="kc-ico">📋</span></div>
+            <div class="kc-val">{{ ds.livraisons.length }}</div>
+            <div class="kc-lbl">Total</div>
+          </div>
+          <div class="kpi-card kc-vert">
+            <div class="kc-top"><span class="kc-ico">✅</span></div>
+            <div class="kc-val">{{ livsTerminees() }}</div>
+            <div class="kc-lbl">Livrées</div>
+          </div>
+          <div class="kpi-card kc-or">
+            <div class="kc-top"><span class="kc-ico">🔄</span></div>
+            <div class="kc-val">{{ livsEnCours() }}</div>
+            <div class="kc-lbl">En cours</div>
+          </div>
+          <div class="kpi-card kc-rouge">
+            <div class="kc-top"><span class="kc-ico">⏰</span></div>
+            <div class="kc-val">{{ livsEnRetard() }}</div>
+            <div class="kc-lbl">En retard</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table class="data-tbl">
+              <thead>
+                <tr>
+                  <th>Livreur</th>
+                  <th>Zone</th>
+                  <th class="hide-sm">Commandes</th>
+                  <th>Montant</th>
+                  <th class="hide-sm">Heure</th>
+                  <th>Statut</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (l of ds.livraisons; track l.id) {
+                  <tr [class.sel]="livraisonSel()?.id === l.id" (click)="selLiv(l)">
+                    <td>
+                      <div class="td-user">
+                        <div class="td-ava">{{ l.livreurNom[0] }}</div>
+                        <span>{{ l.livreurNom }}</span>
+                      </div>
+                    </td>
+                    <td>📍 {{ l.zone }}</td>
+                    <td class="hide-sm">
+                      <strong>{{ l.commandes }}</strong>
+                    </td>
+                    <td>
+                      <strong>{{ fmtCFA(l.montant) }}</strong>
+                    </td>
+                    <td class="hide-sm">{{ l.heure }}</td>
+                    <td>
+                      <span class="badge" [class]="statLiv(l).cls">{{ statLiv(l).label }}</span>
+                    </td>
+                    <td>
+                      @if (l.statut === 'en_retard') {
+                        <button class="btn-alert">⚠️ Alerter</button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        @if (livraisonSel()) {
+          <div class="card detail-panel">
+            <div class="dp-head">
+              <h4>Détail — {{ livraisonSel()!.livreurNom }}</h4>
+              <button (click)="livraisonSel.set(null)">✕</button>
+            </div>
+            <div class="dp-grid">
+              <div>
+                <small>Zone</small><strong>{{ livraisonSel()!.zone }}</strong>
+              </div>
+              <div>
+                <small>Commandes</small><strong>{{ livraisonSel()!.commandes }}</strong>
+              </div>
+              <div>
+                <small>Montant</small><strong>{{ fmtCFA(livraisonSel()!.montant) }}</strong>
+              </div>
+              <div>
+                <small>Statut</small>
+                <span class="badge" [class]="statLiv(livraisonSel()!).cls">
+                  {{ statLiv(livraisonSel()!).label }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }

@@ -1,0 +1,402 @@
+<!-- ────────── VUE STOCKS ────────── -->
+@if (vue() === 'stocks') {
+  <div class="gd-content">
+    <div class="content-header">
+      <div>
+        <h2>📦 Gestion des stocks</h2>
+        <p>{{ ingredients().length }} ingrédients · {{ ingredientsBas() }} en stock bas</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-secondary" (click)="showFormMouvement.set(true)">
+          📋 Nouveau mouvement
+        </button>
+        <button class="btn-primary" (click)="showFormIngredient.set(true)">
+          + Nouvel ingrédient
+        </button>
+      </div>
+    </div>
+
+    <div class="kpis-4">
+      <div class="kpi-card kc-or">
+        <div class="kc-top"><span class="kc-ico">📦</span></div>
+        <div class="kc-val">{{ ingredients().length }}</div>
+        <div class="kc-lbl">Ingrédients</div>
+      </div>
+      <div class="kpi-card kc-vert">
+        <div class="kc-top"><span class="kc-ico">✅</span></div>
+        <div class="kc-val">{{ ingredientsOk() }}</div>
+        <div class="kc-lbl">Stock OK</div>
+      </div>
+      <div class="kpi-card kc-rose">
+        <div class="kc-top"><span class="kc-ico">⚠️</span></div>
+        <div class="kc-val">{{ ingredientsBas() }}</div>
+        <div class="kc-lbl">Stock bas</div>
+      </div>
+      <div class="kpi-card kc-rouge">
+        <div class="kc-top"><span class="kc-ico">💸</span></div>
+        <div class="kc-val" style="font-size: 13px">{{ fmtCFA(valeurTotaleStock()) }}</div>
+        <div class="kc-lbl">Valeur du stock</div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <button [class.active]="filtreStockCat() === 'tous'" (click)="setFiltreStockCat('tous')">
+        Tout ({{ ingredients().length }})
+      </button>
+      @for (cat of categoriesStock(); track cat) {
+        <button [class.active]="filtreStockCat() === cat" (click)="setFiltreStockCat(cat)">
+          {{ cat }} ({{ ingredientsParCategorie(cat) }})
+        </button>
+      }
+    </div>
+
+    <div class="chips-row">
+      <button
+        [class.active]="filtreStockStatut() === 'tous'"
+        (click)="setFiltreStockStatut('tous')"
+      >
+        Tous
+      </button>
+      <button [class.active]="filtreStockStatut() === 'ok'" (click)="setFiltreStockStatut('ok')">
+        ✅ Stock OK
+      </button>
+      <button [class.active]="filtreStockStatut() === 'bas'" (click)="setFiltreStockStatut('bas')">
+        ⚠️ Stock bas
+      </button>
+      <button
+        [class.active]="filtreStockStatut() === 'rupture'"
+        (click)="setFiltreStockStatut('rupture')"
+      >
+        🚫 Rupture
+      </button>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="search-bar-stock">
+      <span>🔍</span>
+      <input
+        type="text"
+        placeholder="Rechercher un ingrédient..."
+        [ngModel]="searchStock()"
+        (ngModelChange)="searchStock.set($event)"
+      />
+    </div>
+
+    <div class="stock-table-wrapper">
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Ingrédient</th>
+            <th>Catégorie</th>
+            <th>Stock actuel</th>
+            <th>Seuil alerte</th>
+            <th>Unité</th>
+            <th>Prix unitaire</th>
+            <th>Valeur</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ing of ingredientsFiltres(); track ing.id) {
+            <tr
+              class="stock-row"
+              [class.bas]="ing.statut === 'bas'"
+              [class.rupture]="ing.statut === 'rupture'"
+            >
+              <td>
+                <div class="sr-ingredient">
+                  <span class="sr-ico">{{ ing.icone }}</span>
+                  <div>
+                    <span class="sr-nom">{{ ing.nom }}</span>
+                    <span class="sr-fournisseur">{{ ing.fournisseur }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="sr-cat">{{ ing.categorie }}</span>
+              </td>
+              <td>
+                <div class="sr-stock-info">
+                  <span class="sr-quantite">{{ ing.quantite }}</span>
+                  <div class="sr-bar-wrapper">
+                    <div class="sr-bar" [style.width.%]="pourcentageStock(ing)"></div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="sr-seuil">{{ ing.seuilAlerte }}</span>
+              </td>
+              <td>
+                <span class="sr-unite">{{ ing.unite }}</span>
+              </td>
+              <td>
+                <span class="sr-prix">{{ fmtCFA(ing.prixUnitaire) }}</span>
+              </td>
+              <td>
+                <span class="sr-valeur">{{ fmtCFA(ing.quantite * ing.prixUnitaire) }}</span>
+              </td>
+              <td>
+                <span class="badge" [class]="statutStock(ing.statut).cls">
+                  {{ statutStock(ing.statut).label }}
+                </span>
+              </td>
+              <td>
+                <div class="sr-actions">
+                  <button
+                    class="btn-icon"
+                    title="Entrée stock"
+                    (click)="ouvrirMouvement(ing, 'entree')"
+                  >
+                    📥
+                  </button>
+                  <button
+                    class="btn-icon"
+                    title="Sortie stock"
+                    (click)="ouvrirMouvement(ing, 'sortie')"
+                  >
+                    📤
+                  </button>
+                  <button class="btn-icon" title="Modifier" (click)="modifierIngredient(ing)">
+                    ✏️
+                  </button>
+                  <button
+                    class="btn-icon btn-icon-danger"
+                    title="Supprimer"
+                    (click)="supprimerIngredient(ing.id)"
+                  >
+                    🗑
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Derniers mouvements -->
+    <div class="card">
+      <div class="card-head">
+        <h3>🔄 Derniers mouvements</h3>
+        <button class="card-link">Voir tout</button>
+      </div>
+      <div class="mouvements-list">
+        @for (m of derniersMouvements(); track m.id) {
+          <div
+            class="mvt-item"
+            [class.entree]="m.type === 'entree'"
+            [class.sortie]="m.type === 'sortie'"
+          >
+            <div class="mvt-left">
+              <span class="mvt-type">{{ m.type === 'entree' ? '📥' : '📤' }}</span>
+              <div>
+                <span class="mvt-ingredient">{{ m.ingredient }}</span>
+                <span class="mvt-date">{{ m.date }} par {{ m.par }}</span>
+              </div>
+            </div>
+            <div class="mvt-right">
+              <span class="mvt-quantite"
+                >{{ m.type === 'entree' ? '+' : '-' }}{{ m.quantite }} {{ m.unite }}</span
+              >
+              <span class="mvt-motif">{{ m.motif }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ────────── MODAL NOUVEL INGRÉDIENT ────────── -->
+@if (showFormIngredient()) {
+  <div class="modal-bg" (click)="showFormIngredient.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>📦 {{ editingIngredient() ? 'Modifier' : 'Nouvel' }} ingrédient</h3>
+        <button (click)="fermerFormIngredient()">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="f2">
+          <div class="frow">
+            <label>Nom *</label>
+            <input
+              type="text"
+              placeholder="Ex: Poulet"
+              [ngModel]="newIngredient().nom"
+              (ngModelChange)="setIngredientField('nom', $event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Catégorie *</label>
+            <select
+              [ngModel]="newIngredient().categorie"
+              (ngModelChange)="setIngredientField('categorie', $event)"
+            >
+              <option value="">-- Choisir --</option>
+              @for (c of categoriesStock(); track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Quantité *</label>
+            <input
+              type="number"
+              placeholder="50"
+              [ngModel]="newIngredient().quantite"
+              (ngModelChange)="setIngredientField('quantite', $event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Seuil d'alerte *</label>
+            <input
+              type="number"
+              placeholder="10"
+              [ngModel]="newIngredient().seuilAlerte"
+              (ngModelChange)="setIngredientField('seuilAlerte', $event)"
+            />
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Unité *</label>
+            <select
+              [ngModel]="newIngredient().unite"
+              (ngModelChange)="setIngredientField('unite', $event)"
+            >
+              <option value="kg">kg</option>
+              <option value="L">L</option>
+              <option value="unité">Unité</option>
+              <option value="bouteille">Bouteille</option>
+              <option value="sac">Sac</option>
+              <option value="boîte">Boîte</option>
+            </select>
+          </div>
+          <div class="frow">
+            <label>Prix unitaire (FCFA)</label>
+            <input
+              type="number"
+              placeholder="2500"
+              [ngModel]="newIngredient().prixUnitaire"
+              (ngModelChange)="setIngredientField('prixUnitaire', $event)"
+            />
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Icône</label>
+            <input
+              type="text"
+              placeholder="🍗"
+              [ngModel]="newIngredient().icone"
+              (ngModelChange)="setIngredientField('icone', $event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Fournisseur</label>
+            <input
+              type="text"
+              placeholder="Ex: Marché central"
+              [ngModel]="newIngredient().fournisseur"
+              (ngModelChange)="setIngredientField('fournisseur', $event)"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="fermerFormIngredient()">Annuler</button>
+        <button class="btn-primary" (click)="sauvegarderIngredient()">
+          ✅ {{ editingIngredient() ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ────────── MODAL MOUVEMENT DE STOCK ────────── -->
+@if (showFormMouvement()) {
+  <div class="modal-bg" (click)="showFormMouvement.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>📋 Mouvement de stock</h3>
+        <button (click)="showFormMouvement.set(false)">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="frow">
+          <label>Type de mouvement *</label>
+          <div class="type-mvt-buttons">
+            <button
+              class="btn-mvt"
+              [class.active]="newMouvement().type === 'entree'"
+              (click)="setMouvementField('type', 'entree')"
+            >
+              📥 Entrée
+            </button>
+            <button
+              class="btn-mvt"
+              [class.active]="newMouvement().type === 'sortie'"
+              (click)="setMouvementField('type', 'sortie')"
+            >
+              📤 Sortie
+            </button>
+          </div>
+        </div>
+        <div class="frow">
+          <label>Ingrédient *</label>
+          <select
+            [ngModel]="newMouvement().ingredientId"
+            (ngModelChange)="setMouvementField('ingredientId', $event)"
+          >
+            <option value="">-- Choisir --</option>
+            @for (ing of ingredients(); track ing.id) {
+              <option [value]="ing.id">{{ ing.nom }} ({{ ing.quantite }} {{ ing.unite }})</option>
+            }
+          </select>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Quantité *</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="5"
+              [ngModel]="newMouvement().quantite"
+              (ngModelChange)="setMouvementField('quantite', $event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Motif</label>
+            <select
+              [ngModel]="newMouvement().motif"
+              (ngModelChange)="setMouvementField('motif', $event)"
+            >
+              <option value="Achat">Achat fournisseur</option>
+              <option value="Inventaire">Ajustement inventaire</option>
+              <option value="Perte">Perte/gaspillage</option>
+              <option value="Retour">Retour fournisseur</option>
+              <option value="Utilisation">Utilisation cuisine</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <label>Notes</label>
+          <textarea
+            rows="2"
+            placeholder="Détails du mouvement..."
+            [ngModel]="newMouvement().notes"
+            (ngModelChange)="setMouvementField('notes', $event)"
+          >
+          </textarea>
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="showFormMouvement.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="validerMouvement()">✅ Valider</button>
+      </div>
+    </div>
+  </div>
+}

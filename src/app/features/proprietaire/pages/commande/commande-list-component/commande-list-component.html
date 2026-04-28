@@ -1,0 +1,355 @@
+<div class="commandes-container">
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📦 Commandes des boulangeries</h1>
+      <p class="page-subtitle">
+        {{ commandesEnAttente().length }} commande(s) en attente de validation · Total
+        {{ formatCFA(totalEnAttente()) }}
+      </p>
+    </div>
+
+    <div class="header-buttons">
+      <button class="btn-refresh" (click)="resetFiltres()">🔄 Actualiser</button>
+      <button class="btn-history" (click)="voirHistorique()">📜 Voir historique commandes</button>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filtres-bar">
+    <div class="filtre-item">
+      <label>N° commande</label>
+      <input
+        type="text"
+        class="filtre-input"
+        placeholder="Ex: CMD001"
+        [ngModel]="filtreNumero()"
+        (ngModelChange)="filtreNumero.set($event)"
+      />
+    </div>
+
+    <div class="filtre-item">
+      <label>Boulangerie</label>
+      <select
+        class="filtre-select"
+        [ngModel]="filtreBoulangerie()"
+        (ngModelChange)="filtreBoulangerie.set($event)"
+      >
+        <option value="toutes">Toutes</option>
+        @for (boulangerie of boulangeriesOptions(); track boulangerie) {
+          @if (boulangerie !== 'toutes') {
+            <option [value]="boulangerie">{{ boulangerie }}</option>
+          }
+        }
+      </select>
+    </div>
+
+    <div class="filtre-item search-item">
+      <label>Recherche</label>
+      <input
+        type="text"
+        class="filtre-input"
+        placeholder="ID, boulangerie, gérant..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      />
+    </div>
+
+    <button class="reset-btn" (click)="resetFiltres()">Réinitialiser</button>
+  </div>
+
+  <!-- Statistiques rapides -->
+  <div class="stats-cards">
+    <div class="stat-card warning">
+      <span class="stat-icon">⏳</span>
+      <span class="stat-value">{{ commandesEnAttente().length }}</span>
+      <span class="stat-label">En attente</span>
+    </div>
+    <div class="stat-card info">
+      <span class="stat-icon">✓</span>
+      <span class="stat-value">{{ commandesValidees().length }}</span>
+      <span class="stat-label">Validées</span>
+    </div>
+
+    <div class="stat-card info">
+      <span class="stat-icon">✅</span>
+      <span class="stat-value">{{ commandesValidees().length }}</span>
+      <span class="stat-label">Livrées</span>
+    </div>
+
+    <div class="stat-card success">
+      <span class="stat-icon">💰</span>
+      <span class="stat-value">{{ formatCFA(totalEnAttente()) }}</span>
+      <span class="stat-label">Montant en attente</span>
+    </div>
+  </div>
+
+  <!-- Liste des commandes -->
+  <div class="commandes-list">
+    @for (commande of commandesPaginees(); track commande.id) {
+      <div class="commande-card" [class.attente]="commande.statut === 'en_attente'">
+        <div class="commande-header">
+          <div class="header-left">
+            <span class="commande-id">#{{ commande.id }}</span>
+            <span class="commande-date">{{ formatDate(commande.date) }}</span>
+            <span class="commande-boulangerie">🏪 {{ commande.boulangerie }}</span>
+          </div>
+          <div class="header-right">
+            <span class="statut-badge" [class]="getStatutInfo(commande.statut).class">
+              {{ getStatutInfo(commande.statut).icon }} {{ getStatutInfo(commande.statut).label }}
+            </span>
+          </div>
+        </div>
+
+        <div class="commande-body">
+          <div class="info-row">
+            <span class="info-label">Gérant :</span>
+            <span class="info-value">👤 {{ commande.gerantNom }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Produits :</span>
+            <div class="produits-list">
+              @for (produit of commande.produits; track produit.nom) {
+                <span class="produit-tag">
+                  {{ produit.quantite }}x {{ produit.nom }}
+                  <span class="produit-unite">({{ produit.unite }})</span>
+                </span>
+              }
+            </div>
+          </div>
+          @if (commande.note) {
+            <div class="info-row note-row">
+              <span class="info-label">Note :</span>
+              <span class="info-value note-text">📝 {{ commande.note }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="commande-footer">
+          <div class="total-montant">
+            <span class="total-label">Total :</span>
+            <span class="total-value">{{ formatCFA(commande.total) }}</span>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-details" (click)="voirDetails(commande)">🔍 Détails</button>
+            @if (commande.statut === 'en_attente') {
+              <button class="btn-edit" (click)="ouvrirModification(commande)">✏️ Modifier</button>
+              <button class="btn-validate" (click)="validerCommande()">✅ Valider</button>
+            }
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <span class="empty-icon">📭</span>
+        <h3>Aucune commande trouvée</h3>
+        <p>Essayez de modifier vos filtres</p>
+      </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if (commandesFiltrees().length > 0) {
+    <div class="pagination-container">
+      <div class="pagination-info">
+        <span>
+          {{ (currentPage() - 1) * itemsPerPage() + 1 }} -
+          {{ Math.min(currentPage() * itemsPerPage(), commandesFiltrees().length) }}
+          sur {{ commandesFiltrees().length }} commandes
+        </span>
+        <div class="items-per-page">
+          <label>Afficher :</label>
+          <select [ngModel]="itemsPerPage()" (ngModelChange)="changeItemsPerPage($event)">
+            @for (option of itemsPerPageOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage() === 1"
+          (click)="changePage(currentPage() - 1)"
+        >
+          &laquo;
+        </button>
+        @for (page of getPageNumbers(); track $index) {
+          @if (page === -1) {
+            <span class="pagination-dots">...</span>
+          } @else {
+            <button
+              class="pagination-btn"
+              [class.active]="currentPage() === page"
+              (click)="changePage(page)"
+            >
+              {{ page }}
+            </button>
+          }
+        }
+        <button
+          class="pagination-btn"
+          [disabled]="currentPage() === totalPages()"
+          (click)="changePage(currentPage() + 1)"
+        >
+          &raquo;
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Modal Détails -->
+@if (showDetailsModal() && selectedCommande()) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📋 Détails de la commande #{{ selectedCommande()!.id }}</h3>
+        <button class="close-btn" (click)="fermerModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Date</span>
+            <span class="detail-value">{{ formatDateLong(selectedCommande()!.date) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Boulangerie</span>
+            <span class="detail-value">{{ selectedCommande()!.boulangerie }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Gérant</span>
+            <span class="detail-value">{{ selectedCommande()!.gerantNom }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type</span>
+            <span class="detail-value">{{ getTypeInfo(selectedCommande()!.type).label }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fournisseur</span>
+            <span class="detail-value">{{ selectedCommande()!.fournisseur }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Statut</span>
+            <span class="detail-value">
+              <span class="status-badge" [class]="getStatutInfo(selectedCommande()!.statut).class">
+                {{ getStatutInfo(selectedCommande()!.statut).icon }}
+                {{ getStatutInfo(selectedCommande()!.statut).label }}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="produits-section">
+          <div class="section-title">📦 Produits commandés</div>
+          <table class="produits-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Qté</th>
+                <th>Unité</th>
+                <th>Prix unit.</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of selectedCommande()!.produits; track p.nom) {
+                <tr>
+                  <td>{{ p.nom }}</td>
+                  <td>{{ p.quantite }}</td>
+                  <td>{{ p.unite }}</td>
+                  <td>{{ formatCFA(p.prix) }}</td>
+                  <td>{{ formatCFA(p.quantite * p.prix) }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4"><strong>Total</strong></td>
+                <td>
+                  <strong>{{ formatCFA(selectedCommande()!.total) }}</strong>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        @if (selectedCommande()!.note) {
+          <div class="note-section">
+            <div class="section-title">📝 Note</div>
+            <p class="note-content">{{ selectedCommande()!.note }}</p>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="fermerModal()">Fermer</button>
+        @if (selectedCommande()!.statut === 'en_attente') {
+          <button class="btn-validate" (click)="validerCommande()">✅ Valider</button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Modification -->
+@if (showEditModal() && selectedCommande()) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>✏️ Modifier la commande #{{ selectedCommande()!.id }}</h3>
+        <button class="close-btn" (click)="fermerModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="edit-section">
+          <div class="section-title">📦 Produits</div>
+          @for (produit of editedProduits(); track $index; let i = $index) {
+            <div class="produit-edit-row">
+              <span class="produit-nom">{{ produit.nom }}</span>
+              <span class="produit-prix">{{ formatCFA(produit.prix) }} / {{ produit.unite }}</span>
+              <div class="quantite-controls">
+                <button (click)="modifierQuantiteProduit(i, produit.quantite - 1)">-</button>
+                <input
+                  type="number"
+                  [ngModel]="produit.quantite"
+                  (ngModelChange)="modifierQuantiteProduit(i, $event)"
+                  min="0"
+                />
+                <button (click)="modifierQuantiteProduit(i, produit.quantite + 1)">+</button>
+              </div>
+              <span class="produit-total">{{ formatCFA(produit.quantite * produit.prix) }}</span>
+            </div>
+          }
+          <div class="nouveau-total">
+            Nouveau total : <strong>{{ formatCFA(nouveauTotal()) }}</strong>
+          </div>
+        </div>
+
+        <div class="edit-section">
+          <div class="section-title">📋 Informations</div>
+          <div class="form-group">
+            <label>Statut</label>
+            <select [ngModel]="editedStatut()" (ngModelChange)="editedStatut.set($event)">
+              <option value="en_attente">⏳ En attente</option>
+              <option value="validee">✓ Validée</option>
+              <option value="annulee">❌ Annulée</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Note</label>
+            <textarea
+              rows="2"
+              [ngModel]="editedNote()"
+              (ngModelChange)="editedNote.set($event)"
+              placeholder="Ajouter une note..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="fermerModal()">Annuler</button>
+        <button class="btn-primary" (click)="sauvegarderModifications()">💾 Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+}

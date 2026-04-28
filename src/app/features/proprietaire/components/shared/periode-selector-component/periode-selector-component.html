@@ -1,0 +1,13 @@
+<div class="periode-selector" role="tablist">
+  @for (p of periodes; track p.id) {
+    <button
+      class="periode-btn"
+      [class.active]="periode() === p.id"
+      (click)="selectPeriode(p.id)"
+      [attr.aria-selected]="periode() === p.id"
+      role="tab"
+    >
+      {{ p.label }}
+    </button>
+  }
+</div>

@@ -1,0 +1,243 @@
+<div class="rapports-container">
+  <!-- ══════════ EN-TÊTE ══════════ -->
+  <div class="content-header">
+    <div>
+      <h2>📈 Rapports & Analyses</h2>
+      <p>Suivez la performance de votre restaurant</p>
+    </div>
+    <button class="btn-primary" (click)="genererRapport()">📄 Générer un rapport</button>
+  </div>
+
+  <!-- ══════════ FILTRES ══════════ -->
+  <div class="filtres-row">
+    <div class="chips-row">
+      <button [class.active]="periode() === 'jour'" (click)="setPeriode('jour')">
+        Aujourd'hui
+      </button>
+      <button [class.active]="periode() === 'semaine'" (click)="setPeriode('semaine')">
+        Semaine
+      </button>
+      <button [class.active]="periode() === 'mois'" (click)="setPeriode('mois')">Mois</button>
+      <button [class.active]="periode() === 'trimestre'" (click)="setPeriode('trimestre')">
+        Trimestre
+      </button>
+      <button [class.active]="periode() === 'annee'" (click)="setPeriode('annee')">Année</button>
+    </div>
+  </div>
+
+  <!-- ══════════ INDICATEURS DE PERFORMANCE ══════════ -->
+  <section class="section">
+    <h3 class="section-title">🎯 Indicateurs clés de performance</h3>
+    <div class="indicateurs-grid">
+      @for (ind of indicateurs(); track ind.nom) {
+        <div class="indicateur-card card">
+          <div class="ind-header">
+            <span class="ind-ico">{{ ind.icone }}</span>
+            <div class="ind-info">
+              <span class="ind-nom">{{ ind.nom }}</span>
+              <span class="ind-objectif">Objectif: {{ ind.objectif }}</span>
+            </div>
+            <span class="tendance-badge" [class]="getTendanceCls(ind.tendance)">
+              {{ getTendanceIco(ind.tendance) }} {{ ind.evolution > 0 ? '+' : ''
+              }}{{ ind.evolution }}%
+            </span>
+          </div>
+          <div class="ind-valeur">{{ ind.valeur }}</div>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                [class]="getTauxCls(ind.tauxAtteinte)"
+                [style.width.%]="Math.min(ind.tauxAtteinte, 100)"
+              ></div>
+            </div>
+            <span class="progress-value" [class]="getTauxCls(ind.tauxAtteinte)">
+              {{ ind.tauxAtteinte }}%
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ══════════ COMPARAISON PÉRIODES ══════════ -->
+  <section class="section">
+    <h3 class="section-title">📊 Comparaison avec la période précédente</h3>
+    <div class="card">
+      <div class="comparaison-table-wrapper">
+        <table class="comparaison-table">
+          <thead>
+            <tr>
+              <th>Indicateur</th>
+              <th>Période précédente</th>
+              <th>Période actuelle</th>
+              <th>Évolution</th>
+              <th>Progression</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of comparaison(); track c.indicateur) {
+              <tr>
+                <td>
+                  <span class="comp-indicateur">
+                    <span>{{ c.icone }}</span>
+                    <span>{{ c.indicateur }}</span>
+                  </span>
+                </td>
+                <td>
+                  <span class="comp-valeur">{{
+                    c.indicateur.includes('CA') ||
+                    c.indicateur.includes('Dépenses') ||
+                    c.indicateur.includes('Bénéfice')
+                      ? formatCFAFull(c.periodePrecedente)
+                      : formatNombre(c.periodePrecedente)
+                  }}</span>
+                </td>
+                <td>
+                  <span class="comp-valeur actuelle">
+                    {{
+                      c.indicateur.includes('CA') ||
+                      c.indicateur.includes('Dépenses') ||
+                      c.indicateur.includes('Bénéfice')
+                        ? formatCFAFull(c.periodeActuelle)
+                        : formatNombre(c.periodeActuelle)
+                    }}
+                  </span>
+                </td>
+                <td>
+                  <span class="comp-evolution" [class]="getEvolutionCls(c.evolution)">
+                    {{ getEvolutionIco(c.evolution) }} {{ c.evolution > 0 ? '+' : ''
+                    }}{{ c.evolution }}%
+                  </span>
+                </td>
+                <td>
+                  <div class="comp-bar-wrapper">
+                    <div
+                      class="comp-bar"
+                      [class]="getEvolutionCls(c.evolution)"
+                      [style.width.%]="Math.min(Math.abs(c.evolution) * 2, 100)"
+                    ></div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ VENTES PAR HEURE ══════════ -->
+  <section class="section">
+    <h3 class="section-title">⏰ Ventes par heure</h3>
+    <div class="card chart-card">
+      <div class="ventes-heure-chart">
+        @for (v of ventesParHeure(); track v.heure) {
+          <div class="vh-column">
+            <div class="vh-bar-wrapper">
+              <div
+                class="vh-bar"
+                [style.height.%]="(v.ventes / ventesMax()) * 100"
+                [title]="formatCFAFull(v.ventes)"
+              ></div>
+            </div>
+            <span class="vh-commandes">{{ v.commandes }}</span>
+            <span class="vh-heure">{{ v.heure }}</span>
+          </div>
+        }
+      </div>
+      <div class="vh-legend">
+        <span>📋 Nombre de commandes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ TOP PRODUITS ══════════ -->
+  <section class="section">
+    <h3 class="section-title">🏆 Top produits</h3>
+    <div class="card">
+      <div class="top-produits-grid">
+        @for (p of topProduits(); track p.nom) {
+          <div class="tp-card">
+            <div class="tp-rank">
+              <span class="tp-ico">{{ p.icone }}</span>
+            </div>
+            <div class="tp-info">
+              <span class="tp-nom">{{ p.nom }}</span>
+              <span class="tp-cat">{{ p.categorie }}</span>
+              <span class="tp-evolution" [class]="getEvolutionCls(p.evolution)">
+                {{ getEvolutionIco(p.evolution) }} {{ p.evolution > 0 ? '+' : ''
+                }}{{ p.evolution }}%
+              </span>
+            </div>
+            <div class="tp-stats">
+              <div class="tp-stat">
+                <span class="tp-stat-val">{{ p.ventes }}</span>
+                <span class="tp-stat-lbl">Ventes</span>
+              </div>
+              <div class="tp-stat">
+                <span class="tp-stat-val">{{ formatCFA(p.montant) }}</span>
+                <span class="tp-stat-lbl">CA</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ RAPPORTS GÉNÉRÉS ══════════ -->
+  <section class="section">
+    <div class="section-header">
+      <h3 class="section-title">📁 Rapports générés</h3>
+      <div class="chips-row">
+        <button [class.active]="typeRapport() === 'ventes'" (click)="setTypeRapport('ventes')">
+          💰 Ventes
+        </button>
+        <button [class.active]="typeRapport() === 'finances'" (click)="setTypeRapport('finances')">
+          📈 Finances
+        </button>
+        <button
+          [class.active]="typeRapport() === 'performance'"
+          (click)="setTypeRapport('performance')"
+        >
+          👥 Performance
+        </button>
+        <button [class.active]="typeRapport() === 'stocks'" (click)="setTypeRapport('stocks')">
+          📦 Stocks
+        </button>
+      </div>
+    </div>
+
+    <div class="rapports-grid">
+      @for (r of rapports(); track r.id) {
+        <div class="rapport-card card">
+          <div class="rp-header">
+            <span class="rp-ico">{{ getFormatIco(r.format) }}</span>
+            <div class="rp-info">
+              <span class="rp-titre">{{ r.titre }}</span>
+              <span class="rp-periode">Période: {{ r.periode }}</span>
+            </div>
+            <span class="rp-format">{{ r.format }}</span>
+          </div>
+          <div class="rp-details">
+            <div class="rp-detail">
+              <span>📅</span>
+              <span>Généré le {{ r.dateGeneration }}</span>
+            </div>
+            <div class="rp-detail">
+              <span>📦</span>
+              <span>{{ r.taille }}</span>
+            </div>
+          </div>
+          <div class="rp-actions">
+            <button class="btn-secondary btn-sm" (click)="telechargerRapport(r)">
+              📥 Télécharger
+            </button>
+            <button class="btn-secondary btn-sm">👁 Aperçu</button>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+</div>

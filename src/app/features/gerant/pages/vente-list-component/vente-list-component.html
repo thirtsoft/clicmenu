@@ -1,0 +1,191 @@
+<div class="ventes-container">
+  <!-- En-tête -->
+  <div class="ventes-header">
+    <div>
+      <h1 class="ventes-title">💰 Analyse des ventes</h1>
+      <p class="ventes-subtitle">Performances commerciales {{ getPeriodeLabel() }}</p>
+    </div>
+    <div class="ventes-actions">
+      <button class="btn-filtre" (click)="toggleFiltres()">
+        <span class="btn-ico">🔍</span>
+        <span class="btn-text">Filtrer</span>
+      </button>
+      <button class="btn-export" (click)="exporterVentes()">
+        <span class="btn-ico">📥</span>
+        <span class="btn-text">Exporter</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sélecteur de période -->
+  <div class="periode-selector">
+    <button
+      class="periode-btn"
+      [class.active]="periode() === 'jour'"
+      (click)="changerPeriode('jour')"
+    >
+      Aujourd'hui
+    </button>
+    <button
+      class="periode-btn"
+      [class.active]="periode() === 'semaine'"
+      (click)="changerPeriode('semaine')"
+    >
+      Cette semaine
+    </button>
+    <button
+      class="periode-btn"
+      [class.active]="periode() === 'mois'"
+      (click)="changerPeriode('mois')"
+    >
+      Ce mois
+    </button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-grid">
+    <div class="kpi-card kc-rose">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Ventes totales</span>
+        <span class="kpi-value">{{ formatMontant(totalVentes()) }}</span>
+        <span class="kpi-trend positive">+12% vs période précédente</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kc-vert">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Commandes</span>
+        <span class="kpi-value">{{ totalCommandes() }}</span>
+        <span class="kpi-trend positive">+8%</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kc-or">
+      <div class="kpi-icon">📈</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Panier moyen</span>
+        <span class="kpi-value">{{ formatMontant(panierMoyen()) }}</span>
+        <span class="kpi-trend positive">+5%</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kc-bleu">
+      <div class="kpi-icon">🚚</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Livraisons</span>
+        <span class="kpi-value">{{ livraisonsTerminees() }}</span>
+        <span class="kpi-trend">{{ livraisonsTerminees() }} / {{ ds.livraisons.length }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphique principal -->
+  <div class="card chart-card">
+    <div class="card-header">
+      <h3>Ventes par heure</h3>
+      <div class="card-legend">
+        <span class="legend-item">
+          <span class="legend-dot" style="background: var(--pain-rose)"></span>
+          Ventes (FCFA)
+        </span>
+      </div>
+    </div>
+    <div class="chart-container">
+      <div class="bar-chart">
+        @for (v of ventesParHeure(); track v.heure) {
+          <div class="bar-column">
+            <span class="bar-value">{{ formatMontant(v.ventes) }}</span>
+            <div class="bar-wrapper">
+              <div
+                class="bar"
+                [style.height.%]="(v.ventes / maxVentesHeure()) * 80"
+                [style.background]="'linear-gradient(180deg, var(--pain-rose), var(--pain-deep))'"
+              ></div>
+            </div>
+            <span class="bar-label">{{ v.heure }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Deux colonnes : Top produits et Ventes par jour -->
+  <div class="two-columns">
+    <!-- Top produits -->
+    <div class="card">
+      <div class="card-header">
+        <h3>🏆 Top produits</h3>
+        <span class="badge">Cette semaine</span>
+      </div>
+      <div class="top-produits">
+        @for (produit of topProduits(); track produit.nom; let i = $index) {
+          <div class="top-produit-item">
+            <div class="top-produit-rank">#{{ i + 1 }}</div>
+            <div class="top-produit-info">
+              <span class="top-produit-nom">{{ produit.nom }}</span>
+              <span class="top-produit-stats">
+                {{ produit.quantite }} unités · {{ formatMontant(produit.montant) }}
+              </span>
+            </div>
+            <span
+              class="top-produit-evolution"
+              [class.positive]="produit.evolution > 0"
+              [class.negative]="produit.evolution < 0"
+            >
+              {{ produit.evolution > 0 ? '+' : '' }}{{ produit.evolution }}%
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Ventes par jour -->
+    <div class="card">
+      <div class="card-header">
+        <h3>📅 Ventes par jour</h3>
+        <span class="badge">7 derniers jours</span>
+      </div>
+      <div class="jour-chart">
+        @for (jour of ventesParJour(); track jour.jour) {
+          <div class="jour-row">
+            <span class="jour-label">{{ jour.jour }}</span>
+            <div class="jour-bar-wrapper">
+              <div
+                class="jour-bar"
+                [style.width.%]="(jour.montant / 250000) * 100"
+                [style.background]="'var(--pain-rose)'"
+              ></div>
+            </div>
+            <span class="jour-value">{{ formatMontant(jour.montant) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau de filtres (mobile) -->
+  @if (showFiltres()) {
+    <div class="filtres-panel">
+      <div class="filtres-header">
+        <h3>Filtres</h3>
+        <button class="close-btn" (click)="toggleFiltres()">✕</button>
+      </div>
+      <div class="filtres-content">
+        <div class="filtres-group">
+          <label>Date début</label>
+          <input type="date" [ngModel]="dateDebut()" (ngModelChange)="dateDebut.set($event)" />
+        </div>
+        <div class="filtres-group">
+          <label>Date fin</label>
+          <input type="date" [ngModel]="dateFin()" (ngModelChange)="dateFin.set($event)" />
+        </div>
+        <div class="filtres-actions">
+          <button class="btn-secondary" (click)="resetFiltres()">Réinitialiser</button>
+          <button class="btn-primary" (click)="appliquerFiltres()">Appliquer</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

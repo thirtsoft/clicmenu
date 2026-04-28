@@ -1,0 +1,707 @@
+<!-- proprietaire-dashboard.component.html -->
+<div class="prop-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <!-- ══════ SIDEBAR ══════ -->
+  <aside class="prop-sidebar">
+    <!-- Brand -->
+    <div class="sb-brand">
+      <div class="sb-logo">🥐</div>
+      @if (!sidebarCollapsed()) {
+        <div class="sb-brand-text">
+          <span class="sb-name">Rose</span>
+          <span class="sb-sub">Groupe Boulangerie</span>
+        </div>
+      }
+      <button class="sb-toggle" (click)="sidebarCollapsed.set(!sidebarCollapsed())">
+        {{ sidebarCollapsed() ? '→' : '←' }}
+      </button>
+    </div>
+
+    <!-- Profile -->
+    @if (!sidebarCollapsed()) {
+      <div class="sb-profile">
+        <div class="sb-ava">P</div>
+        <div class="sb-profile-info">
+          <div class="sb-pnom">Propriétaire</div>
+          <div class="sb-pmail">proprietaire&#64;rose.sn</div>
+        </div>
+      </div>
+    }
+
+    <!-- Nav -->
+    <nav class="sb-nav">
+      @for (item of nav; track item.id) {
+        <button
+          class="sb-item"
+          [class.active]="sectionActive() === item.id"
+          (click)="sectionActive.set(item.id)"
+          [title]="item.label"
+        >
+          <span class="sb-ico">{{ item.icone }}</span>
+          @if (!sidebarCollapsed()) {
+            <span class="sb-label">{{ item.label }}</span>
+            @if (item.badge) {
+              <span class="sb-badge">{{ item.badge }}</span>
+            }
+          }
+        </button>
+      }
+    </nav>
+
+    @if (!sidebarCollapsed()) {
+      <div class="sb-footer">
+        <div class="sb-footer-stat">
+          <span class="sbf-val">{{ boulangeries().length }}</span>
+          <span class="sbf-lbl">Boulangeries</span>
+        </div>
+        <div class="sb-footer-stat">
+          <span class="sbf-val">{{ gerants().length }}</span>
+          <span class="sbf-lbl">Gérants</span>
+        </div>
+      </div>
+    }
+  </aside>
+
+  <!-- ══════ MAIN ══════ -->
+  <div class="prop-main">
+    <!-- Topbar -->
+    <header class="prop-topbar">
+      <div class="ptb-left">
+        <h2 class="ptb-title">
+          {{ getSectionLabel(sectionActive()) }}
+        </h2>
+      </div>
+      <div class="ptb-right">
+        <!-- Période (aperçu seulement) -->
+        @if (sectionActive() === 'apercu') {
+          <div class="periode-tabs">
+            @for (p of periodes; track p.id) {
+              <button
+                class="periode-tab"
+                [class.active]="periode() === p.id"
+                (click)="periode.set(p.id)"
+              >
+                {{ p.label }}
+              </button>
+            }
+          </div>
+        }
+        <div class="ptb-date">{{ todayStr }}</div>
+      </div>
+    </header>
+
+    <!-- ══ SECTION APERÇU ══ -->
+    @if (sectionActive() === 'apercu') {
+      <div class="section-content">
+        <!-- KPIs -->
+        <div class="kpis-4">
+          <div class="kpi-card kpi-rose">
+            <div class="kc-top"><span>💰</span><span class="kc-var pos">↑ +8.4%</span></div>
+            <div class="kc-val">{{ formatCFAFull(totalCA()) }}</div>
+            <div class="kc-lbl">Chiffre d'affaires</div>
+          </div>
+          <div class="kpi-card kpi-vert">
+            <div class="kc-top"><span>🛒</span><span class="kc-var pos">↑ +5%</span></div>
+            <div class="kc-val">{{ totalCommandes() | number }}</div>
+            <div class="kc-lbl">Commandes totales</div>
+          </div>
+          <div class="kpi-card kpi-or">
+            <div class="kc-top"><span>🏆</span></div>
+            <div class="kc-val" style="font-size: 16px">{{ meilleureBoulangerie().nom }}</div>
+            <div class="kc-lbl">Meilleure boutique</div>
+          </div>
+          <div class="kpi-card kpi-bleu">
+            <div class="kc-top"><span>🎯</span></div>
+            <div class="kc-val">{{ tauxMoyenObjectif() }}%</div>
+            <div class="kc-lbl">Taux objectif moyen</div>
+          </div>
+        </div>
+
+        <!-- Boulangeries overview -->
+        <div class="section-sub-title">Performance par établissement</div>
+        <div class="b-cards-grid">
+          @for (b of boulangeries(); track b.id) {
+            <div class="b-card card">
+              <div class="bc-top">
+                <span class="bc-ico">🥖</span>
+                <div class="bc-info">
+                  <div class="bc-nom">{{ b.nom }}</div>
+                  <div class="bc-loc">{{ b.adresse }}</div>
+                </div>
+                <span class="tbadge" [class]="getTendanceCls(b.tendance)"
+                  >{{ getTendanceIco(b.tendance) }} {{ b.tendance }}</span
+                >
+              </div>
+              <div class="bc-big-val">{{ formatCFA(b.ventesJour) }}</div>
+              <div class="bc-obj">Objectif : {{ formatCFA(b.objectifJour) }}</div>
+              <div class="bc-prog-row">
+                <div class="bc-prog">
+                  <div
+                    class="bc-prog-fill"
+                    [class]="getTauxCls(b.taux)"
+                    [style.width.%]="Math.min(b.taux, 100)"
+                  ></div>
+                </div>
+                <span class="bc-pct" [class]="getTauxCls(b.taux)">{{ b.taux }}%</span>
+              </div>
+              @if (b.taux >= 100) {
+                <div class="flag-ok">🏆 Objectif dépassé</div>
+              }
+              @if (b.taux < 75) {
+                <div class="flag-warn">⚠️ Sous les objectifs</div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Graphiques -->
+        <div class="graphs-duo">
+          <div class="card gcard">
+            <h3>Ventes hebdomadaires — Groupe</h3>
+            <div class="hebdo-chart">
+              @for (v of ventesHebdo; track v.jour) {
+                <div class="hc-col">
+                  <div class="hc-bar-wrap">
+                    <div
+                      class="hc-bar"
+                      [style.height.%]="(v.ventes / ventesMaxHebdo()) * 100"
+                    ></div>
+                  </div>
+                  <span class="hc-val">{{ formatCFA(v.ventes) }}</span>
+                  <span class="hc-jour">{{ v.jour }}</span>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="card gcard">
+            <h3>Comparaison des établissements</h3>
+            <div class="compare-chart">
+              @for (b of boulangeries(); track b.id) {
+                <div class="cc-item">
+                  <div class="cc-lbl">{{ b.nom.split('—')[1]?.trim() }}</div>
+                  <div class="cc-wrap">
+                    <div
+                      class="cc-fill"
+                      [class]="getTauxCls(b.taux)"
+                      [style.width.%]="(b.ventesJour / getMaxVenteBoulangerie()) * 100"
+                    ></div>
+                    <span class="cc-val">{{ formatCFA(b.ventesJour) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ SECTION BOULANGERIES ══ -->
+    @if (sectionActive() === 'boulangeries') {
+      <div class="section-content">
+        <div class="section-toolbar">
+          <div class="stb-stats">
+            <span>{{ boulangeries().length }} établissements</span>
+            <span class="badge success">{{ activeBoulangeriesCount() }} actifs</span>
+          </div>
+          <button class="btn-primary" (click)="showFormBoulangerie.set(true)">
+            + Nouvelle boulangerie
+          </button>
+        </div>
+
+        <div class="b-table-grid">
+          @for (b of boulangeries(); track b.id) {
+            <div class="blist-card card">
+              <div class="blc-header">
+                <div class="blc-icon">🏪</div>
+                <div class="blc-meta">
+                  <div class="blc-nom">{{ b.nom }}</div>
+                  <div class="blc-addr">{{ b.adresse }}, {{ b.ville }}</div>
+                </div>
+                <span class="badge" [class]="getStatutBoulangerie(b.statut).cls">{{
+                  getStatutBoulangerie(b.statut).label
+                }}</span>
+              </div>
+              <div class="blc-details">
+                <div class="blc-row">
+                  <span>📞</span><span>{{ b.telephone }}</span>
+                </div>
+                <div class="blc-row">
+                  <span>👤</span
+                  ><span
+                    >Gérant : <strong>{{ b.gerantNom }}</strong></span
+                  >
+                </div>
+                <div class="blc-row">
+                  <span>📐</span><span>{{ b.superficie }} m²</span>
+                </div>
+                <div class="blc-row">
+                  <span>📅</span><span>Ouverte le {{ b.dateOuverture }}</span>
+                </div>
+              </div>
+              <div class="blc-kpis">
+                <div class="blc-kpi">
+                  <span class="blck-val">{{ formatCFA(b.ventesJour) }}</span>
+                  <span class="blck-lbl">Ventes / jour</span>
+                </div>
+                <div class="blc-kpi">
+                  <span class="blck-val" [class]="getTauxCls(b.taux)">{{ b.taux }}%</span>
+                  <span class="blck-lbl">Taux objectif</span>
+                </div>
+                <div class="blc-kpi">
+                  <span class="blck-val">{{ b.commandesJour }}</span>
+                  <span class="blck-lbl">Commandes</span>
+                </div>
+              </div>
+              <div class="blc-actions">
+                <button class="btn-secondary btn-sm">✏️ Modifier</button>
+                <button class="btn-danger btn-sm" (click)="supprimerBoulangerie(b.id)">
+                  🗑 Supprimer
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ══ SECTION GÉRANTS ══ -->
+    @if (sectionActive() === 'gerants') {
+      <div class="section-content">
+        <div class="section-toolbar">
+          <div class="stb-stats">
+            <span>{{ gerants().length }} comptes</span>
+            <span class="badge success">{{ actifGerantsCount() }} actifs</span>
+            <span class="badge warning">{{ congeGerantsCount() }} en congé</span>
+          </div>
+          <button class="btn-primary" (click)="showFormGerant.set(true)">+ Nouveau gérant</button>
+        </div>
+
+        <div class="gerants-grid">
+          @for (g of gerants(); track g.id) {
+            <div class="gerant-card card">
+              <div class="gc-header">
+                <div class="gc-ava">{{ g.photo }}</div>
+                <div class="gc-info">
+                  <div class="gc-nom">{{ g.prenom }} {{ g.nom }}</div>
+                  <div class="gc-role">Gérant</div>
+                </div>
+                <span class="badge" [class]="getStatutGerant(g.statut).cls">{{
+                  getStatutGerant(g.statut).label
+                }}</span>
+              </div>
+              <div class="gc-details">
+                <div class="gcd-row">
+                  <span class="gcd-ico">🏪</span><span>{{ g.boulangerie }}</span>
+                </div>
+                <div class="gcd-row">
+                  <span class="gcd-ico">✉️</span><span>{{ g.email }}</span>
+                </div>
+                <div class="gcd-row">
+                  <span class="gcd-ico">📞</span><span>{{ g.telephone }}</span>
+                </div>
+                <div class="gcd-row">
+                  <span class="gcd-ico">📅</span><span>Depuis {{ g.dateEmbauche }}</span>
+                </div>
+              </div>
+              <div class="gc-actions">
+                <button class="btn-secondary btn-sm">🔑 Réinitialiser MDP</button>
+                <button class="btn-secondary btn-sm">✏️ Modifier</button>
+                <button class="btn-danger btn-sm" (click)="supprimerGerant(g.id)">🗑</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ══ SECTION APPROVISIONNEMENT ══ -->
+    @if (sectionActive() === 'approvisionnement') {
+      <div class="section-content appro-layout">
+        <!-- Panneau gauche : catalogue + panier -->
+        <div class="appro-left">
+          <!-- Sélecteur boulangerie -->
+          <div class="card appro-target">
+            <label class="field-label">Approvisionner la boulangerie :</label>
+            <div class="b-chips">
+              @for (b of boulangeries(); track b.id) {
+                <button
+                  class="b-chip"
+                  [class.active]="boulangerieApproSelectee() === b.id"
+                  (click)="boulangerieApproSelectee.set(b.id)"
+                >
+                  {{ b.nom }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Filtres catégories -->
+          <div class="appro-cats">
+            @for (cat of categoriesFiltreAppro(); track cat) {
+              <button
+                class="cat-btn"
+                [class.active]="categorieProduitAppro() === cat"
+                (click)="categorieProduitAppro.set(cat)"
+              >
+                {{ cat }}
+              </button>
+            }
+          </div>
+
+          <!-- Catalogue produits -->
+          <div class="appro-catalogue">
+            @for (p of produitsFiltresAppro(); track p.id) {
+              <div
+                class="appro-prod-card card"
+                [class.in-cart]="getQteAppro(p.id) > 0"
+                (click)="ajouterAppro(p)"
+              >
+                <div class="apc-ico">{{ p.icone }}</div>
+                <div class="apc-info">
+                  <div class="apc-nom">{{ p.nom }}</div>
+                  <div class="apc-cat">{{ p.categorie }}</div>
+                  <div class="apc-prix">{{ formatCFA(p.prixUnitaire) }} / {{ p.unite }}</div>
+                </div>
+                @if (getQteAppro(p.id) > 0) {
+                  <div class="apc-qty-badge">{{ getQteAppro(p.id) }}</div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Panneau droite : panier + historique -->
+        <div class="appro-right">
+          <!-- Panier -->
+          <div class="card appro-panier">
+            <div class="ap-header">
+              <h3>🛒 Bon de commande</h3>
+              <span class="badge info">{{ panierAppro().length }} lignes</span>
+            </div>
+            @if (panierAppro().length === 0) {
+              <div class="ap-vide">
+                <span>📦</span>
+                <p>Sélectionnez des produits</p>
+              </div>
+            }
+            <div class="ap-lines">
+              @for (l of panierAppro(); track l.produit.id) {
+                <div class="ap-line">
+                  <div class="apl-ico">{{ l.produit.icone }}</div>
+                  <div class="apl-info">
+                    <span class="apl-nom">{{ l.produit.nom }}</span>
+                    <span class="apl-b">→ {{ nomBoulangerie(l.boulangerieId) }}</span>
+                  </div>
+                  <div class="apl-qty">
+                    <button (click)="modifierQteAppro(l.produit.id, -1)">−</button>
+                    <span>{{ l.quantite }}</span>
+                    <button (click)="modifierQteAppro(l.produit.id, +1)">+</button>
+                  </div>
+                  <div class="apl-total">{{ formatCFA(l.total) }}</div>
+                </div>
+              }
+            </div>
+            @if (panierAppro().length > 0) {
+              <div class="ap-footer">
+                <div class="ap-total">
+                  <span>Total commande</span>
+                  <strong>{{ formatCFAFull(totalPanierAppro()) }}</strong>
+                </div>
+                <button class="btn-primary" style="width: 100%" (click)="passerCommande()">
+                  📤 Passer la commande
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Historique -->
+          <div class="card appro-hist">
+            <h3>Commandes récentes</h3>
+            <div class="hist-list">
+              @for (cmd of commandesAppro(); track cmd.id) {
+                <div class="hist-item">
+                  <div class="hi-info">
+                    <span class="hi-fourn">{{ cmd.fournisseur }}</span>
+                    <span class="hi-date">{{ cmd.date | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                  <div class="hi-right">
+                    <span>{{ formatCFAFull(cmd.total) }}</span>
+                    <span class="badge" [class]="getStatutAppro(cmd.statut).cls">{{
+                      getStatutAppro(cmd.statut).label
+                    }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ SECTION INVESTISSEMENTS ══ -->
+    @if (sectionActive() === 'investissements') {
+      <div class="section-content">
+        <!-- KPIs investissements -->
+        <div class="invest-kpis">
+          <div class="card ik">
+            <span class="ik-ico">💼</span>
+            <span class="ik-val">{{ formatCFAFull(totalInvesti()) }}</span>
+            <span class="ik-lbl">Total investi (réalisé)</span>
+          </div>
+          <div class="card ik">
+            <span class="ik-ico">📅</span>
+            <span class="ik-val">{{ formatCFAFull(totalPlanifie()) }}</span>
+            <span class="ik-lbl">Investissements planifiés</span>
+          </div>
+          <div class="card ik">
+            <span class="ik-ico">✅</span>
+            <span class="ik-val">{{ realiseInvestissementsCount() }}</span>
+            <span class="ik-lbl">Projets réalisés</span>
+          </div>
+          <div class="card ik">
+            <span class="ik-ico">🔄</span>
+            <span class="ik-val">{{ enCoursInvestissementsCount() }}</span>
+            <span class="ik-lbl">Projets en cours</span>
+          </div>
+        </div>
+
+        <!-- Filtres + bouton -->
+        <div class="section-toolbar">
+          <div class="invest-filtres">
+            <div class="filtre-group">
+              <label>Catégorie</label>
+              <div class="chips-row">
+                @for (cat of categoriesInvest; track cat) {
+                  <button
+                    class="chip-btn"
+                    [class.active]="filtreCatInvest() === cat"
+                    (click)="filtreCatInvest.set(cat)"
+                  >
+                    {{ cat }}
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="filtre-group">
+              <label>Statut</label>
+              <div class="chips-row">
+                @for (s of ['Tout', 'planifie', 'en_cours', 'realise']; track s) {
+                  <button
+                    class="chip-btn"
+                    [class.active]="filtreStatutInvest() === s"
+                    (click)="filtreStatutInvest.set(s)"
+                  >
+                    {{ s }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" (click)="showFormInvest.set(true)">
+            + Nouvel investissement
+          </button>
+        </div>
+
+        <!-- Liste investissements -->
+        <div class="invest-list">
+          @for (inv of investsFiltres(); track inv.id) {
+            <div class="invest-card card" [class]="'invest-' + inv.statut">
+              <div class="inv-left">
+                <div class="inv-ico-wrap">{{ getCatInvestIco(inv.categorie) }}</div>
+              </div>
+              <div class="inv-body">
+                <div class="inv-top">
+                  <div class="inv-titre">{{ inv.titre }}</div>
+                  <div class="inv-tags">
+                    <span class="chip-lbl">{{ inv.categorie }}</span>
+                    <span class="badge" [class]="getStatutInvest(inv.statut).cls">{{
+                      getStatutInvest(inv.statut).label
+                    }}</span>
+                  </div>
+                </div>
+                <div class="inv-desc">{{ inv.description }}</div>
+                <div class="inv-meta">
+                  <span>🏪 {{ inv.boulangerie }}</span>
+                  <span>📅 {{ inv.date }}</span>
+                  @if (inv.retourEstime > 0) {
+                    <span>⏱ ROI estimé : {{ inv.retourEstime }} mois</span>
+                  }
+                </div>
+              </div>
+              <div class="inv-right">
+                <div class="inv-montant">{{ formatCFAFull(inv.montant) }}</div>
+                <div class="inv-actions">
+                  <button class="btn-secondary btn-sm">✏️</button>
+                  <button class="btn-danger btn-sm">🗑</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ══ MODAL NOUVELLE BOULANGERIE ══ -->
+  @if (showFormBoulangerie()) {
+    <div class="modal-overlay" (click)="showFormBoulangerie.set(false)">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>🏪 Ajouter une boulangerie</h3>
+          <button (click)="showFormBoulangerie.set(false)">✕</button>
+        </div>
+        <div class="modal-form">
+          <div class="form-row">
+            <label>Nom de la boutique *</label>
+            <input
+              type="text"
+              placeholder="ex : Rose — Sacré-Cœur"
+              [ngModel]="nouveauBoulangerie().nom"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+          <div class="form-row-2">
+            <div class="form-row">
+              <label>Adresse *</label>
+              <input
+                type="text"
+                placeholder="Rue, avenue…"
+                [ngModel]="nouveauBoulangerie().adresse"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Ville</label>
+              <input
+                type="text"
+                placeholder="Dakar"
+                [ngModel]="nouveauBoulangerie().ville"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-row">
+              <label>Téléphone</label>
+              <input
+                type="tel"
+                placeholder="+221 77 …"
+                [ngModel]="nouveauBoulangerie().telephone"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Superficie (m²)</label>
+              <input
+                type="number"
+                placeholder="100"
+                [ngModel]="nouveauBoulangerie().superficie"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-row">
+              <label>Nom du gérant</label>
+              <input
+                type="text"
+                placeholder="Prénom Nom"
+                [ngModel]="nouveauBoulangerie().gerantNom"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Objectif journalier (FCFA)</label>
+              <input
+                type="number"
+                placeholder="250000"
+                [ngModel]="nouveauBoulangerie().objectifJour"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showFormBoulangerie.set(false)">Annuler</button>
+          <button class="btn-primary" (click)="ajouterBoulangerie()">
+            ✅ Créer la boulangerie
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ MODAL NOUVEAU GÉRANT ══ -->
+  @if (showFormGerant()) {
+    <div class="modal-overlay" (click)="showFormGerant.set(false)">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>👤 Créer un compte gérant</h3>
+          <button (click)="showFormGerant.set(false)">✕</button>
+        </div>
+        <div class="modal-form">
+          <div class="form-row-2">
+            <div class="form-row">
+              <label>Prénom *</label>
+              <input
+                type="text"
+                [ngModel]="nouveauGerant().prenom"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Nom *</label>
+              <input
+                type="text"
+                [ngModel]="nouveauGerant().nom"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Email *</label>
+            <input
+              type="email"
+              placeholder="prenom.nom@rose.sn"
+              [ngModel]="nouveauGerant().email"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+          <div class="form-row-2">
+            <div class="form-row">
+              <label>Téléphone</label>
+              <input
+                type="tel"
+                [ngModel]="nouveauGerant().telephone"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+            <div class="form-row">
+              <label>Date d'embauche</label>
+              <input
+                type="date"
+                [ngModel]="nouveauGerant().dateEmbauche"
+                (change)="updateGerantBoulangerieId($event)"
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Boulangerie assignée</label>
+            <select
+              [ngModel]="nouveauGerant().boulangerieId"
+              (change)="updateGerantBoulangerieId($event)"
+            >
+              <option value="">-- Sélectionner --</option>
+              @for (b of boulangeries(); track b.id) {
+                <option [value]="b.id">{{ b.nom }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showFormGerant.set(false)">Annuler</button>
+          <button class="btn-primary" (click)="ajouterGerant()">✅ Créer le compte</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

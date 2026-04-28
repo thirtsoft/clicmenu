@@ -1,0 +1,121 @@
+<div class="modal-overlay" (click)="onCancelClick()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- En-tête -->
+    <div class="modal-header">
+      <h2>{{ boulangerie() ? '✏️ Modifier' : '🏪 Ajouter' }} une boulangerie</h2>
+      <button class="close-btn" (click)="onCancelClick()">✕</button>
+    </div>
+
+    <!-- Formulaire -->
+    <form (ngSubmit)="onSubmit()" #boulangerieForm="ngForm" class="modal-form">
+      <div class="form-grid">
+        <!-- Nom -->
+        <div class="form-group full-width">
+          <label for="nom">Nom de la boutique *</label>
+          <input
+            type="text"
+            id="nom"
+            name="nom"
+            placeholder="ex: Rose — Sacré-Cœur"
+            [ngModel]="formData().nom"
+            (ngModelChange)="updateField('nom', $event)"
+            required
+          />
+        </div>
+
+        <!-- Adresse et Ville -->
+        <div class="form-group">
+          <label for="adresse">Adresse *</label>
+          <input
+            type="text"
+            id="adresse"
+            name="adresse"
+            placeholder="Rue, avenue…"
+            [ngModel]="formData().adresse"
+            (ngModelChange)="updateField('adresse', $event)"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="ville">Ville</label>
+          <select
+            id="ville"
+            name="ville"
+            [ngModel]="formData().ville"
+            (ngModelChange)="updateField('ville', $event)"
+          >
+            @for (ville of villes; track ville) {
+              <option [value]="ville">{{ ville }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Téléphone et Superficie -->
+        <div class="form-group">
+          <label for="telephone">Téléphone</label>
+          <input
+            type="tel"
+            id="telephone"
+            name="telephone"
+            placeholder="+221 77 …"
+            [ngModel]="formData().telephone"
+            (ngModelChange)="updateField('telephone', $event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="superficie">Superficie (m²)</label>
+          <input
+            type="number"
+            id="superficie"
+            name="superficie"
+            placeholder="100"
+            [ngModel]="formData().superficie"
+            (ngModelChange)="updateField('superficie', $event)"
+          />
+        </div>
+
+        <!-- Gérant et Objectif -->
+        <div class="form-group">
+          <label for="gerantNom">Nom du gérant *</label>
+          <input
+            type="text"
+            id="gerantNom"
+            name="gerantNom"
+            placeholder="Prénom Nom"
+            [ngModel]="formData().gerantNom"
+            (ngModelChange)="updateField('gerantNom', $event)"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="objectifJour">Objectif journalier (FCFA)</label>
+          <input
+            type="number"
+            id="objectifJour"
+            name="objectifJour"
+            placeholder="250000"
+            [ngModel]="formData().objectifJour"
+            (ngModelChange)="updateField('objectifJour', $event)"
+          />
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="onCancelClick()">
+          Annuler
+        </button>
+        <button 
+          type="submit" 
+          class="btn-primary"
+          [disabled]="!isFormValid()"
+        >
+          {{ boulangerie() ? '✅ Mettre à jour' : '✅ Créer la boulangerie' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirection...</title>
+    <script>
+      // Redirige vers l'index principal en conservant le chemin
+      sessionStorage.redirect = location.href;
+      location.replace('/e-boulangerie/');
+    </script>
+  </head>
+  <body>
+    <p>Redirection...</p>
+  </body>
+</html>

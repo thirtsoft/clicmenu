@@ -1,0 +1,26 @@
+<div class="kpi-card" [class]="'kpi-' + color()">
+  <div class="kpi-header">
+    <span class="kpi-icon">{{ icon() }}</span>
+    @if (trend()) {
+      <span class="kpi-trend" [class]="'trend-' + trendDirection()">
+        <span class="trend-arrow">
+          {{ trendDirection() === 'up' ? '↑' : trendDirection() === 'down' ? '↓' : '→' }}
+        </span>
+        {{ trend() }}%
+      </span>
+    }
+  </div>
+
+  <div class="kpi-content">
+    <span class="kpi-value">{{ value() }}</span>
+    <span class="kpi-label">{{ label() }}</span>
+    @if (subvalue()) {
+      <span class="kpi-subvalue">{{ subvalue() }}</span>
+    }
+  </div>
+
+  <!-- Barre de progression décorative -->
+  <div class="kpi-progress">
+    <div class="progress-bar" [style.width.%]="trend() ? Math.min(100, +trend()! * 5) : 75"></div>
+  </div>
+</div>

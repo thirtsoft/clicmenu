@@ -1,0 +1,227 @@
+<div class="historique-container">
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📜 Historique des commandes</h1>
+      <p class="page-subtitle">{{ commandesFiltrees().length }} commande(s) trouvée(s)</p>
+    </div>
+    <button class="btn-back" (click)="retourListeCommandes()">← Retour aux commandes</button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filtres-row">
+    <div class="filtre-item">
+      <input
+        type="text"
+        placeholder="N° commande"
+        [ngModel]="filtreNumero()"
+        (ngModelChange)="filtreNumero.set($event)"
+      />
+    </div>
+    <div class="filtre-item">
+      <select [ngModel]="filtreStatut()" (ngModelChange)="filtreStatut.set($event)">
+        @for (s of statutsDisponibles; track s.value) {
+          <option [value]="s.value">{{ s.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filtre-item">
+      <select [ngModel]="filtreType()" (ngModelChange)="filtreType.set($event)">
+        @for (t of typesDisponibles; track t.value) {
+          <option [value]="t.value">{{ t.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="filtre-item">
+      <select [ngModel]="filtreAnnee()" (ngModelChange)="filtreAnnee.set($event)">
+        <option value="toutes">Toutes</option>
+        @for (a of anneesDisponibles(); track a) {
+          <option [value]="a">{{ a }}</option>
+        }
+      </select>
+    </div>
+    <div class="filtre-item">
+      <select
+        [ngModel]="filtreMois()"
+        (ngModelChange)="filtreMois.set($event)"
+        [disabled]="filtreAnnee() === 'toutes'"
+      >
+        @for (m of moisDisponibles; track m.value) {
+          <option [value]="m.value">{{ m.label }}</option>
+        }
+      </select>
+    </div>
+    <button class="reset-btn" (click)="resetFiltres()">Réinitialiser</button>
+    <button class="btn-excel" (click)="exporterExcel()">📊 Excel</button>
+    <button class="btn-pdf" (click)="exporterPDF()">📄 PDF</button>
+  </div>
+
+  <!-- Total -->
+  <div class="total-bar">
+    <span class="total-label">Total des commandes affichées :</span>
+    <span class="total-value">{{ formatCFA(totalAffiche()) }}</span>
+    <span class="total-count">({{ commandesPaginees().length }} commandes)</span>
+  </div>
+
+  <!-- Tableau - ESPACE PRINCIPAL -->
+  <div class="table-wrapper" #tableContainer>
+    <div class="table-scroll">
+      <table class="commandes-table">
+        <thead>
+          <tr>
+            <th>N° commande</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Destinataire</th>
+            <th>Statut</th>
+            <th class="montant-col">Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cmd of commandesPaginees(); track cmd.id) {
+            <tr class="clickable-row" (click)="voirDetails(cmd)">
+              <td class="commande-id">#{{ cmd.id }}</td>
+              <td>{{ formatDate(cmd.date) }}</td>
+              <td>
+                <span class="type-badge" [class]="cmd.type">
+                  {{ getTypeInfo(cmd.type).icon }} {{ getTypeInfo(cmd.type).label }}
+                </span>
+              </td>
+              <td>{{ cmd.destinataire }}</td>
+              <td>
+                <span class="status-badge" [class]="getStatutInfo(cmd.statut).class">
+                  {{ getStatutInfo(cmd.statut).icon }} {{ getStatutInfo(cmd.statut).label }}
+                </span>
+              </td>
+              <td class="montant-col">
+                <strong>{{ formatCFA(cmd.total) }}</strong>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-row">
+                <div class="empty-state">📭 Aucune commande trouvée</div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  @if (commandesFiltrees().length > 0) {
+    <div class="pagination">
+      <div class="pagination-info">
+        <span
+          >{{ (currentPage() - 1) * itemsPerPage() + 1 }} -
+          {{ Math.min(currentPage() * itemsPerPage(), commandesFiltrees().length) }}
+          sur {{ commandesFiltrees().length }} commandes</span
+        >
+        <div class="items-per-page">
+          <span>Afficher :</span>
+          <select [ngModel]="itemsPerPage()" (ngModelChange)="changeItemsPerPage($event)">
+            @for (opt of itemsPerPageOptions; track opt) {
+              <option [value]="opt">{{ opt }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="pagination-controls">
+        <button [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">«</button>
+        @for (page of getPageNumbers(); track $index) {
+          @if (page === -1) {
+            <span class="dots">...</span>
+          } @else {
+            <button [class.active]="currentPage() === page" (click)="changePage(page)">
+              {{ page }}
+            </button>
+          }
+        }
+        <button [disabled]="currentPage() === totalPages()" (click)="changePage(currentPage() + 1)">
+          »
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Modal -->
+@if (showDetailsModal() && selectedCommande()) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📋 Commande #{{ selectedCommande()!.id }}</h3>
+        <button class="close-btn" (click)="fermerModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid">
+          <div>
+            <span class="label">Date</span
+            ><span>{{ formatDateLong(selectedCommande()!.date) }}</span>
+          </div>
+          <div>
+            <span class="label">Type</span
+            ><span
+              >{{ getTypeInfo(selectedCommande()!.type).icon }}
+              {{ getTypeInfo(selectedCommande()!.type).label }}</span
+            >
+          </div>
+          <div>
+            <span class="label">Destinataire</span
+            ><span
+              ><strong>{{ selectedCommande()!.destinataire }}</strong></span
+            >
+          </div>
+          <div>
+            <span class="label">Statut</span
+            ><span class="status-badge" [class]="getStatutInfo(selectedCommande()!.statut).class"
+              >{{ getStatutInfo(selectedCommande()!.statut).icon }}
+              {{ getStatutInfo(selectedCommande()!.statut).label }}</span
+            >
+          </div>
+        </div>
+        <div class="produits-section">
+          <h4>📦 Produits commandés</h4>
+          <div class="produits-table-wrapper">
+            <table class="produits-table">
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Qté</th>
+                  <th>Prix unitaire</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of selectedCommande()!.produits; track p.nom) {
+                  <tr>
+                    <td>{{ p.nom }}</td>
+                    <td>{{ p.quantite }}</td>
+                    <td>{{ formatCFA(p.prix) }}</td>
+                    <td class="montant">{{ formatCFA(p.quantite * p.prix) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="3"><strong>Total général</strong></td>
+                  <td class="montant">
+                    <strong>{{ formatCFA(selectedCommande()!.total) }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        @if (selectedCommande()!.note) {
+          <div class="note-section">📝 {{ selectedCommande()!.note }}</div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn-print" (click)="imprimerPDF()">🖨️ Imprimer</button>
+        <button class="btn-secondary" (click)="fermerModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}

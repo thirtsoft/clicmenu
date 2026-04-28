@@ -1,0 +1,335 @@
+@if (sectionActive() === 'commandes') {
+  <div class="section-content">
+    <div class="page-header">
+      <h1 class="page-title">📜 Historique des commandes</h1>
+      <button class="btn-back" (click)="retourListeCommandes()">← Retour aux commandes</button>
+    </div>
+
+    <!-- Filtres en ligne horizontale -->
+    <div class="filtres-bar">
+      <div class="filtre-item">
+        <label>N° commande</label>
+        <input
+          type="text"
+          class="filtre-input"
+          placeholder="Ex: CMD001"
+          [ngModel]="filtreNumero()"
+          (ngModelChange)="filtreNumero.set($event)"
+        />
+      </div>
+
+      <div class="filtre-item">
+        <label>Boulangerie</label>
+        <select
+          class="filtre-select"
+          [ngModel]="filtreBoulangerie()"
+          (ngModelChange)="filtreBoulangerie.set($event)"
+        >
+          <option value="toutes">Toutes</option>
+          @for (boulangerie of boulangeriesOptions(); track boulangerie) {
+            @if (boulangerie !== 'toutes') {
+              <option [value]="boulangerie">{{ boulangerie }}</option>
+            }
+          }
+        </select>
+      </div>
+
+      <div class="filtre-item">
+        <label>Statut</label>
+        <select
+          class="filtre-select"
+          [ngModel]="filtreStatut()"
+          (ngModelChange)="filtreStatut.set($event)"
+        >
+          @for (statut of statutsDisponibles; track statut.value) {
+            <option [value]="statut.value">{{ statut.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filtre-item">
+        <label>Année</label>
+        <select
+          class="filtre-select"
+          [ngModel]="filtreAnnee()"
+          (ngModelChange)="filtreAnnee.set($event)"
+        >
+          <option value="toutes">Toutes</option>
+          @for (annee of anneesDisponibles(); track annee) {
+            <option [value]="annee">{{ annee }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filtre-item">
+        <label>Mois</label>
+        <select
+          class="filtre-select"
+          [ngModel]="filtreMois()"
+          (ngModelChange)="filtreMois.set($event)"
+          [disabled]="filtreAnnee() === 'toutes'"
+        >
+          @for (mois of moisDisponibles; track mois.value) {
+            <option [value]="mois.value">{{ mois.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="export-buttons">
+        <button class="btn-excel" (click)="exporterExcel()" title="Exporter en Excel">
+          📊 Excel
+        </button>
+        <button class="btn-pdf" (click)="exporterPDF()" title="Exporter en PDF">📄 PDF</button>
+        <button class="reset-btn" (click)="resetFiltres()">Réinitialiser</button>
+      </div>
+    </div>
+
+    <!-- Total des commandes affichées -->
+    <div class="total-bar">
+      <span class="total-label">Total des commandes affichées :</span>
+      <span class="total-value">{{ formatCFA(totalAffiche()) }}</span>
+      <span class="total-count">({{ commandesPaginees().length }} commandes)</span>
+    </div>
+
+    <!-- Tableau des commandes -->
+    <div class="table-container">
+      <table class="commandes-table">
+        <thead>
+          <tr>
+            <th>N° commande</th>
+            <th>Date</th>
+            <th>Boulangerie</th>
+            <th>Gérant</th>
+            <th>Type</th>
+            <th>Statut</th>
+            <th>Fournisseur</th>
+            <th class="montant-col">Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (commande of commandesPaginees(); track commande.id) {
+            <tr class="clickable-row" (click)="voirDetails(commande)">
+              <td class="commande-id-cell">
+                <span class="commande-id-badge">#{{ commande.id }}</span>
+              </td>
+              <td class="date-cell">{{ formatDate(commande.date) }}</td>
+              <td class="boulangerie-cell">
+                <span class="boulangerie-name">🏪 {{ commande.boulangerie }}</span>
+              </td>
+              <td class="gerant-cell">
+                <span class="gerant-name">👤 {{ commande.gerantNom }}</span>
+              </td>
+              <td class="type-cell">
+                <span class="type-badge" [class]="commande.type">
+                  {{ getTypeInfo(commande.type).icon }} {{ getTypeInfo(commande.type).label }}
+                </span>
+              </td>
+              <td class="status-cell">
+                <span class="status-badge" [class]="getStatutInfo(commande.statut).class">
+                  {{ getStatutInfo(commande.statut).icon }}
+                  {{ getStatutInfo(commande.statut).label }}
+                </span>
+              </td>
+              <td class="fournisseur-cell">
+                <span class="fournisseur-name">{{ commande.fournisseur }}</span>
+                <div class="produits-preview">
+                  @for (produit of commande.produits.slice(0, 1); track produit.nom) {
+                    <span class="produit-preview-tag"
+                      >{{ produit.quantite }}x {{ produit.nom }}</span
+                    >
+                  }
+                  @if (commande.produits.length > 1) {
+                    <span class="produit-preview-more">+{{ commande.produits.length - 1 }}</span>
+                  }
+                </div>
+              </td>
+              <td class="montant-cell">
+                <strong class="montant-value">{{ formatCFA(commande.total) }}</strong>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-row">
+                <div class="empty-state">
+                  <span class="empty-icon">📭</span>
+                  <p>Aucune commande trouvée</p>
+                  <button class="reset-btn-small" (click)="resetFiltres()">
+                    Réinitialiser les filtres
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (commandesFiltrees().length > 0) {
+      <div class="pagination-container">
+        <div class="pagination-info">
+          <span>
+            {{ (currentPage() - 1) * itemsPerPage() + 1 }} -
+            {{ Math.min(currentPage() * itemsPerPage(), commandesFiltrees().length) }}
+            sur {{ commandesFiltrees().length }} commandes
+          </span>
+
+          <div class="items-per-page">
+            <label>Afficher :</label>
+            <select [ngModel]="itemsPerPage()" (ngModelChange)="changeItemsPerPage($event)">
+              @for (option of itemsPerPageOptions; track option) {
+                <option [value]="option">{{ option }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage() === 1"
+            (click)="changePage(currentPage() - 1)"
+          >
+            &laquo;
+          </button>
+
+          @for (page of getPageNumbers(); track $index) {
+            @if (page === -1) {
+              <span class="pagination-dots">...</span>
+            } @else {
+              <button
+                class="pagination-btn"
+                [class.active]="currentPage() === page"
+                (click)="changePage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+          }
+
+          <button
+            class="pagination-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="changePage(currentPage() + 1)"
+          >
+            &raquo;
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Modal Détails de la commande -->
+@if (showDetailsModal() && selectedCommande()) {
+  <div class="modal-overlay" (click)="fermerModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📋 Détails de la commande</h3>
+        <div class="modal-header-actions">
+          <button class="close-btn" (click)="fermerModal()">✕</button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <!-- Informations générales -->
+        <div class="details-section">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">N° commande</span>
+              <span class="detail-value commande-id-highlight">#{{ selectedCommande()!.id }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Date</span>
+              <span class="detail-value">{{ formatDateLong(selectedCommande()!.date) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Boulangerie</span>
+              <span class="detail-value">{{ selectedCommande()!.boulangerie }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Gérant</span>
+              <span class="detail-value">{{ selectedCommande()!.gerantNom }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Type</span>
+              <span class="detail-value">
+                <span class="type-badge-modal" [class]="selectedCommande()!.type">
+                  {{ getTypeInfo(selectedCommande()!.type).icon }}
+                  {{ getTypeInfo(selectedCommande()!.type).label }}
+                </span>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Statut</span>
+              <span class="detail-value">
+                <span
+                  class="status-badge-modal"
+                  [class]="getStatutInfo(selectedCommande()!.statut).class"
+                >
+                  {{ getStatutInfo(selectedCommande()!.statut).icon }}
+                  {{ getStatutInfo(selectedCommande()!.statut).label }}
+                </span>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Fournisseur</span>
+              <span class="detail-value">{{ selectedCommande()!.fournisseur }}</span>
+            </div>
+            <div class="detail-item full-width">
+              <span class="detail-label">Observations</span>
+              <span class="detail-value note-text">
+                @if (selectedCommande()!.note) {
+                  {{ selectedCommande()!.note }}
+                } @else {
+                  <em>Aucune observation</em>
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Produits commandés -->
+        <div class="produits-section">
+          <div class="section-title">📦 Produits commandés</div>
+          <table class="produits-detail-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Unité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (produit of selectedCommande()!.produits; track produit.nom) {
+                <tr>
+                  <td class="produit-nom-cell">{{ produit.nom }}</td>
+                  <td class="produit-quantite-cell">{{ produit.quantite }}</td>
+                  <td class="produit-unite-cell">{{ produit.unite }}</td>
+                  <td class="produit-prix-cell">{{ formatCFA(produit.prix) }}</td>
+                  <td class="produit-total-cell">
+                    {{ formatCFA(produit.quantite * produit.prix) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4"><strong>Total général</strong></td>
+                <td>
+                  <strong class="total-grand">{{ formatCFA(selectedCommande()!.total) }}</strong>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="fermerModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}

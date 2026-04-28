@@ -1,0 +1,269 @@
+/* ═══════════════════════════════════════════════
+   SIDEBAR GÉRANT RESTAURANT
+   ═══════════════════════════════════════════════ */
+
+:host {
+  --resto-deep: #8B4513;
+  --resto-terra: #A0522D;
+  --resto-warm: #D2691E;
+  --resto-light: #FFF5EC;
+  --gris-doux: #F5F0EE;
+  --gris-moyen: #8C7B72;
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+
+  display: block;
+  height: 100%;
+}
+
+/* ── Wrapper principal ──────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(170deg, #5C3317 0%, #8B4513 55%, #A0522D 100%);
+  color: white;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* ── Brand ──────────────────────────────────────── */
+.sb-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 72px;
+}
+
+.sb-logo {
+  font-size: 26px;
+  background: rgba(255, 255, 255, 0.15);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sb-brand-text {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sb-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.sb-sub {
+  display: block;
+  font-size: 10px;
+  opacity: 0.65;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.sb-toggle {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.sb-toggle:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ── Profil ─────────────────────────────────────── */
+.sb-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin: 12px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  transition: all 0.3s;
+}
+
+.sb-ava {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.sb-pnom {
+  display: block;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sb-pmail {
+  display: block;
+  font-size: 11px;
+  opacity: 0.65;
+  margin-top: 2px;
+}
+
+/* ── Navigation ─────────────────────────────────── */
+.sb-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+}
+
+.sb-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sb-item.active {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.5);
+}
+
+.sb-ico {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.sb-label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* ── Footer — Déconnexion ───────────────────────── */
+.sb-footer {
+  padding: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sb-deconnexion {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.sb-deconnexion:hover {
+  background: rgba(255, 60, 60, 0.28);
+  color: white;
+}
+
+/* ══════════════════════════════════════════════════
+   MODE RÉDUIT (collapsed)
+   ══════════════════════════════════════════════════ */
+.sidebar.collapsed .sb-brand-text,
+.sidebar.collapsed .sb-pinfo,
+.sidebar.collapsed .sb-label {
+  display: none;
+}
+
+.sidebar.collapsed .sb-brand {
+  justify-content: center;
+  padding: 16px 8px;
+}
+
+.sidebar.collapsed .sb-profile {
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+.sidebar.collapsed .sb-item {
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+.sidebar.collapsed .sb-ico {
+  margin: 0;
+}
+
+.sidebar.collapsed .sb-footer {
+  padding: 10px 8px;
+}
+
+.sidebar.collapsed .sb-deconnexion {
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+/* ══════════════════════════════════════════════════
+   MOBILE — drawer depuis la gauche
+   ══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar.drawer-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 40px rgba(44, 31, 26, 0.35);
+  }
+}

@@ -1,0 +1,58 @@
+<!-- main-layout-gerant.html -->
+<div class="layout-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <!-- Backdrop mobile -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-backdrop" (click)="sidebarOpen.set(false)"></div>
+  }
+
+  <!-- ══ SIDEBAR ══ -->
+  <app-side-bar-gerant-component
+    [collapsed]="sidebarCollapsed()"
+    [open]="sidebarOpen()"
+    (toggleCollapse)="onToggleCollapse()"
+    (close)="onSidebarClose()"
+  >
+  </app-side-bar-gerant-component>
+
+  <!-- ══ ZONE PRINCIPALE ══ -->
+  <div class="layout-main">
+    <!-- Topbar -->
+    <header class="layout-topbar">
+      <div class="lt-left">
+        <button class="hamburger" (click)="sidebarOpen.set(true)" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="lt-breadcrumb">
+          <span class="lt-brand-m">🥖 Rose</span>
+          <span class="lt-sep">/</span>
+          <span class="lt-section">{{ sectionLabel }}</span>
+        </div>
+      </div>
+      <div class="lt-right">
+        <span class="lt-date">{{ dateAuj }}</span>
+        <div class="lt-user">
+          <div class="lt-ava">G</div>
+          <span class="lt-uname">Modou Seck</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══ CONTENU ROUTÉ ══ -->
+    <div class="layout-content">
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- ══ BOTTOM NAV MOBILE ══ -->
+    <nav class="bottom-nav">
+      @for (item of nav; track item.route) {
+        <button class="bn-btn" [class.active]="isActive(item.route)" (click)="naviguer(item.route)">
+          <span class="bn-ico">{{ item.ico }}</span>
+          <span class="bn-lbl">{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+  </div>
+  <!-- /layout-main -->
+</div>

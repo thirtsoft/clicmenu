@@ -1,0 +1,127 @@
+<!-- ────────── VUE CUISINE ────────── -->
+
+<div class="gd-content">
+  <div class="content-header">
+    <div>
+      <h2>👨‍🍳 Suivi cuisine</h2>
+      <p>{{ commandesEnPreparation() }} commandes en préparation</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" (click)="rafraichirCuisine()">🔄 Actualiser</button>
+    </div>
+  </div>
+
+  <div class="kpis-4">
+    <div class="kpi-card kc-rose">
+      <div class="kc-top"><span class="kc-ico">⏳</span></div>
+      <div class="kc-val">{{ commandesEnAttente() }}</div>
+      <div class="kc-lbl">En attente</div>
+    </div>
+    <div class="kpi-card kc-or">
+      <div class="kc-top"><span class="kc-ico">👨‍🍳</span></div>
+      <div class="kc-val">{{ commandesEnPreparation() }}</div>
+      <div class="kc-lbl">En préparation</div>
+    </div>
+    <div class="kpi-card kc-vert">
+      <div class="kc-top"><span class="kc-ico">✅</span></div>
+      <div class="kc-val">{{ commandesTerminees() }}</div>
+      <div class="kc-lbl">Prêtes à servir</div>
+    </div>
+    <div class="kpi-card kc-or">
+      <div class="kc-top"><span class="kc-ico">⏱️</span></div>
+      <div class="kc-val">{{ tempsMoyen() }} min</div>
+      <div class="kc-lbl">Temps moyen</div>
+    </div>
+  </div>
+
+  <div class="chips-row">
+    <button [class.active]="filtreCuisine() === 'tous'" (click)="setFiltreCuisine('tous')">
+      Toutes ({{ commandes().length }})
+    </button>
+    <button
+      [class.active]="filtreCuisine() === 'en_attente'"
+      (click)="setFiltreCuisine('en_attente')"
+    >
+      ⏳ En attente ({{ commandesEnAttente() }})
+    </button>
+    <button
+      [class.active]="filtreCuisine() === 'en_preparation'"
+      (click)="setFiltreCuisine('en_preparation')"
+    >
+      👨‍🍳 En cours ({{ commandesEnPreparation() }})
+    </button>
+    <button [class.active]="filtreCuisine() === 'pret'" (click)="setFiltreCuisine('pret')">
+      ✅ Prêtes ({{ commandesTerminees() }})
+    </button>
+  </div>
+
+  <div class="cuisine-grid">
+    @for (cmd of commandesFiltrees(); track cmd.id) {
+      <div
+        class="cuisine-card card"
+        [class.pret]="cmd.statut === 'pret'"
+        [class.urgent]="cmd.urgent"
+      >
+        <div class="csc-header">
+          <div class="csc-table">🪑 {{ cmd.table }}</div>
+          <span class="badge" [class]="statutCuisine(cmd.statut).cls">
+            {{ statutCuisine(cmd.statut).label }}
+          </span>
+          @if (cmd.urgent) {
+            <span class="badge danger">🔥 Urgent</span>
+          }
+        </div>
+
+        <div class="csc-plats">
+          @for (plat of cmd.plats; track plat.nom) {
+            <div class="csc-plat" [class.fini]="plat.statut === 'pret'">
+              <div class="csc-plat-top">
+                <span class="csc-plat-ico">{{ plat.icone }}</span>
+                <span class="csc-plat-nom">{{ plat.nom }}</span>
+                <span class="csc-plat-qty">x{{ plat.quantite }}</span>
+                @if (plat.statut === 'pret') {
+                  <span class="csc-check">✅</span>
+                }
+              </div>
+              @if (plat.notes) {
+                <div class="csc-notes">📝 {{ plat.notes }}</div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="csc-info">
+          <div>
+            <span>👤</span><span>{{ cmd.serveur }}</span>
+          </div>
+          <div>
+            <span>🕐</span><span>Commande à {{ cmd.heureCommande }}</span>
+          </div>
+          <div>
+            <span>⏱️</span><span>En cours depuis {{ cmd.tempsEcoule }} min</span>
+          </div>
+        </div>
+
+        <div class="csc-actions">
+          @if (cmd.statut === 'en_attente') {
+            <button class="btn-primary btn-sm" (click)="demarrerPreparation(cmd)">
+              ▶ Démarrer
+            </button>
+          }
+          @if (cmd.statut === 'en_preparation') {
+            <button class="btn-secondary btn-sm" (click)="terminerPlat(cmd)">
+              ✅ Prêt à servir
+            </button>
+          }
+          @if (cmd.statut === 'pret') {
+            <button class="btn-primary btn-sm" (click)="servirCommande(cmd)">🍽️ Servi</button>
+          }
+          @if (cmd.statut !== 'servi' && cmd.statut !== 'pret') {
+            <button class="btn-secondary btn-sm">🔥 Urgent</button>
+            <button class="btn-danger btn-sm">❌ Annuler</button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

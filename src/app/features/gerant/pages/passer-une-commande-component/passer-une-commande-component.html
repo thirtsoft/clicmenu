@@ -1,0 +1,259 @@
+<div class="commande-container">
+  <!-- En-tête -->
+  <div class="page-header">
+    <div class="header-top">
+      <h1 class="page-title">📦 Passer une commande</h1>
+      <div class="type-selector">
+        <button
+          class="type-btn"
+          [class.active]="typeCommande() === 'livreur'"
+          (click)="setTypeCommande('livreur')"
+        >
+          🏍️ Livreur
+        </button>
+        <button
+          class="type-btn"
+          [class.active]="typeCommande() === 'fournisseur'"
+          (click)="setTypeCommande('fournisseur')"
+        >
+          🏭 Fournisseur
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout Desktop: 2 colonnes -->
+  <div class="two-columns-layout">
+    <!-- Colonne gauche : Sélection + Catalogue -->
+    <div class="left-column">
+      <!-- Sélection livreur/fournisseur -->
+      <div class="selection-section">
+        @if (typeCommande() === 'livreur') {
+          <div class="selector-card">
+            <div class="selector-icon">🏍️</div>
+            <div class="selector-content">
+              <label class="selector-label">Livreur</label>
+              <select
+                class="selector-select"
+                [ngModel]="livreurSelectionne()?.id"
+                (ngModelChange)="selectLivreurById($event)"
+              >
+                <option value="">-- Sélectionner un livreur --</option>
+                @for (livreur of livreursActifs(); track livreur.id) {
+                  <option [value]="livreur.id">
+                    {{ livreur.prenom }} {{ livreur.nom }} - {{ livreur.zone }}
+                  </option>
+                }
+              </select>
+            </div>
+            @if (livreurSelectionne()) {
+              <div class="selector-badge">✅ {{ livreurSelectionne()?.prenom }}</div>
+            }
+          </div>
+        }
+
+        @if (typeCommande() === 'fournisseur') {
+          <div class="selector-card">
+            <div class="selector-icon">🏭</div>
+            <div class="selector-content">
+              <label class="selector-label">Fournisseur</label>
+              <select
+                class="selector-select"
+                [ngModel]="fournisseurSelectionne()"
+                (ngModelChange)="fournisseurSelectionne.set($event)"
+              >
+                <option value="">-- Sélectionner un fournisseur --</option>
+                <option value="Grands Moulins de Dakar">🌾 Grands Moulins de Dakar</option>
+                <option value="Société Laitière du Sénégal">🥛 Société Laitière du Sénégal</option>
+                <option value="Fournisseur Beurre & Oeufs">🧈 Fournisseur Beurre & Oeufs</option>
+              </select>
+            </div>
+            @if (fournisseurSelectionne()) {
+              <div class="selector-badge">✅ {{ fournisseurSelectionne() }}</div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Catalogue produits -->
+      <div class="catalogue-section">
+        <div class="filtres-bar">
+          <div class="categories-chips">
+            @for (
+              cat of typeCommande() === 'livreur' ? categoriesProduitsVente : categoriesMatiere;
+              track cat
+            ) {
+              <button
+                class="cat-btn"
+                [class.active]="categorieProduit() === cat"
+                (click)="categorieProduit.set(cat)"
+              >
+                {{ cat === 'Tout' ? 'Tous' : cat }}
+              </button>
+            }
+          </div>
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Rechercher..."
+              [ngModel]="searchTerm()"
+              (ngModelChange)="searchTerm.set($event)"
+            />
+          </div>
+        </div>
+
+        <div class="produits-grid">
+          @for (produit of produitsFiltres(); track produit.id) {
+            <div
+              class="produit-card"
+              [class.in-cart]="getQuantitePanier(produit.id) > 0"
+              (click)="ajouterAuPanier(produit)"
+            >
+              <div class="produit-icone">{{ produit.icone }}</div>
+              <div class="produit-info">
+                <span class="produit-nom">{{ produit.nom }}</span>
+                <span class="produit-prix">{{ formatCFA(produit.prixUnitaire) }}</span>
+                <span class="produit-unite">/ {{ produit.unite }}</span>
+              </div>
+              <button class="produit-add-btn">+</button>
+              @if (getQuantitePanier(produit.id) > 0) {
+                <div class="produit-qty-badge">
+                  {{ getQuantitePanier(produit.id) }}
+                </div>
+              }
+            </div>
+          } @empty {
+            <div class="empty-produits">
+              <span>📦</span>
+              <p>Aucun produit trouvé</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne droite : Panier - Visible sur Desktop, caché sur Mobile -->
+    <div class="right-column desktop-only">
+      <div class="panier-card">
+        <div class="panier-header">
+          <h3>🛒 Panier</h3>
+          <span class="badge info">{{ nbLignesPanier() }} article(s)</span>
+        </div>
+
+        @if (nbLignesPanier() === 0) {
+          <div class="panier-vide">
+            <span>🛍️</span>
+            <p>Votre panier est vide</p>
+            <small>Cliquez sur un produit pour l'ajouter</small>
+          </div>
+        } @else {
+          <div class="panier-lignes">
+            @for (
+              item of typeCommande() === 'livreur' ? panierLivreur() : panierFournisseur();
+              track item.produit.id
+            ) {
+              <div class="panier-ligne">
+                <div class="ligne-produit">
+                  <span class="ligne-icone">{{ item.produit.icone }}</span>
+                  <div class="ligne-info">
+                    <span class="ligne-nom">{{ item.produit.nom }}</span>
+                    <span class="ligne-prix">{{ formatCFAFull(item.produit.prixUnitaire) }}</span>
+                  </div>
+                </div>
+                <div class="ligne-controles">
+                  <button class="qty-btn" (click)="modifierQuantite(item.produit.id, -1)">-</button>
+                  <span class="qty-value">{{ item.quantite }}</span>
+                  <button class="qty-btn" (click)="modifierQuantite(item.produit.id, 1)">+</button>
+                  <span class="ligne-total">{{ formatCFAFull(item.total) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="panier-footer">
+            <div class="total-commande">
+              <span>Total</span>
+              <strong>{{ formatCFAFull(totalPanier()) }}</strong>
+            </div>
+            <div class="panier-actions">
+              <button class="btn-secondary" (click)="annulerCommande()">🗑 Vider</button>
+              <button
+                class="btn-primary"
+                [disabled]="!isCommandeValid()"
+                (click)="validerCommande()"
+              >
+                ✅ Valider
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE ONLY: Floating Action Button pour le panier -->
+  @if (isPanierNonVide()) {
+    <button class="fab-cart mobile-only" (click)="togglePanierDrawer()">
+      <span class="fab-icon">🛒</span>
+      <span class="fab-badge">{{ nbLignesPanier() }}</span>
+      <span class="fab-total">{{ formatCFAFull(totalPanier()) }}</span>
+    </button>
+  }
+
+  <!-- MOBILE ONLY: Drawer Panier -->
+  <div class="panier-drawer mobile-only" [class.open]="showPanierDrawer()">
+    <div class="panier-drawer-overlay" (click)="togglePanierDrawer()"></div>
+    <div class="panier-drawer-content">
+      <div class="panier-header">
+        <h3>🛒 Votre panier</h3>
+        <button class="close-drawer" (click)="togglePanierDrawer()">✕</button>
+      </div>
+
+      @if (nbLignesPanier() === 0) {
+        <div class="panier-vide">
+          <span>🛍️</span>
+          <p>Votre panier est vide</p>
+          <small>Cliquez sur un produit pour l'ajouter</small>
+        </div>
+      } @else {
+        <div class="panier-lignes">
+          @for (
+            item of typeCommande() === 'livreur' ? panierLivreur() : panierFournisseur();
+            track item.produit.id
+          ) {
+            <div class="panier-ligne">
+              <div class="ligne-produit">
+                <span class="ligne-icone">{{ item.produit.icone }}</span>
+                <div class="ligne-info">
+                  <span class="ligne-nom">{{ item.produit.nom }}</span>
+                  <span class="ligne-prix">{{ formatCFAFull(item.produit.prixUnitaire) }}</span>
+                </div>
+              </div>
+              <div class="ligne-controles">
+                <button class="qty-btn" (click)="modifierQuantite(item.produit.id, -1)">-</button>
+                <span class="qty-value">{{ item.quantite }}</span>
+                <button class="qty-btn" (click)="modifierQuantite(item.produit.id, 1)">+</button>
+                <span class="ligne-total">{{ formatCFAFull(item.total) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="panier-footer">
+          <div class="total-commande">
+            <span>Total</span>
+            <strong>{{ formatCFAFull(totalPanier()) }}</strong>
+          </div>
+          <div class="panier-actions">
+            <button class="btn-secondary" (click)="annulerCommande()">🗑 Vider</button>
+            <button class="btn-primary" [disabled]="!isCommandeValid()" (click)="validerCommande()">
+              ✅ Valider
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

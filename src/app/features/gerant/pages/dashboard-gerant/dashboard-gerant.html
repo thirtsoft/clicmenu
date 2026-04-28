@@ -1,0 +1,556 @@
+<!-- gerant-dashboard.component.html -->
+<div
+  class="gd-shell"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
+  [class.sidebar-open]="sidebarOpen()"
+>
+  <!-- Backdrop mobile -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-backdrop" (click)="sidebarOpen.set(false)"></div>
+  }
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="gd-sidebar" [class.drawer-open]="sidebarOpen()">
+    <!-- Brand -->
+    <div class="sb-brand">
+      <div class="sb-logo">🥖</div>
+      <div class="sb-brand-text">
+        <span class="sb-name">Rose</span>
+        <span class="sb-sub">Gérant</span>
+      </div>
+      <button class="sb-toggle" (click)="toggleCollapse()" title="Réduire">
+        {{ sidebarCollapsed() ? '→' : '←' }}
+      </button>
+    </div>
+
+    <!-- Profil -->
+    <div class="sb-profile">
+      <div class="sb-ava">G</div>
+      <div class="sb-pinfo">
+        <span class="sb-pnom">Modou Seck</span>
+        <span class="sb-pmail">Gérant · Plateau</span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sb-nav">
+      @for (item of nav; track item.id) {
+        <button
+          class="sb-item"
+          [class.active]="vue() === item.id"
+          (click)="naviguer(item.id)"
+          [title]="item.label"
+        >
+          <span class="sb-ico">{{ item.ico }}</span>
+          <span class="sb-label">{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+
+    <!-- Bas sidebar -->
+    <div class="sb-footer">
+      <button class="sb-deconnexion">
+        <span class="sb-ico">🔓</span>
+        <span class="sb-label">Déconnexion</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══════════ ZONE PRINCIPALE ══════════ -->
+  <div class="gd-main">
+    <!-- Topbar -->
+    <header class="gd-topbar">
+      <div class="gt-left">
+        <button class="hamburger" (click)="sidebarOpen.set(true)" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="gt-breadcrumb">
+          <span class="gt-brand-m">🥖 Rose</span>
+          <span class="gt-sep">/</span>
+          <span class="gt-section">{{ getLabel(vue()) }}</span>
+        </div>
+      </div>
+      <div class="gt-right">
+        <span class="gt-date">{{ dateAuj }}</span>
+        <div class="gt-user">
+          <div class="gt-ava">G</div>
+          <span class="gt-uname">Modou Seck</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ────────── VUE APERÇU ────────── -->
+    @if (vue() === 'apercu') {
+      <div class="gd-content">
+        <div class="content-header">
+          <div>
+            <h2>📊 Tableau de bord</h2>
+            <p>Vue d'ensemble des opérations</p>
+          </div>
+        </div>
+
+        <div class="kpis-4">
+          @for (k of kpis(); track k.label) {
+            <div class="kpi-card" [class]="'kc-' + k.cls">
+              <div class="kc-top">
+                <span class="kc-ico">{{ k.ico }}</span>
+                <span class="kc-var" [class.pos]="k.var > 0" [class.neg]="k.var < 0">
+                  {{ k.var > 0 ? '↑ +' + k.var : k.var < 0 ? '↓ ' + k.var : '—' }}%
+                </span>
+              </div>
+              <div class="kc-val">{{ k.val }}</div>
+              <div class="kc-lbl">{{ k.label }}</div>
+            </div>
+          }
+        </div>
+
+        <div class="duo-grid">
+          <div class="card">
+            <div class="card-head"><h3>Ventes par heure</h3></div>
+            <div class="bar-chart">
+              @for (v of ds.ventesHeure; track v.heure) {
+                <div class="bc-col">
+                  <span class="bc-amount">{{ (v.ventes / 1000).toFixed(0) }}k</span>
+                  <div class="bc-wrap">
+                    <div class="bc-bar" [style.height.%]="(v.ventes / maxVentes()) * 100"></div>
+                  </div>
+                  <span class="bc-lbl">{{ v.heure }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>
+                Livraisons <span class="badge info">{{ ds.livraisons.length }}</span>
+              </h3>
+            </div>
+            @for (l of ds.livraisons; track l.id) {
+              <div class="lm-row">
+                <div class="lm-dot" [class]="statLiv(l).cls"></div>
+                <div class="lm-info">
+                  <span>{{ l.livreurNom }}</span>
+                  <small>{{ l.zone }}</small>
+                </div>
+                <div class="lm-right">
+                  <span>{{ l.commandes }} cmd</span>
+                  <span class="badge" [class]="statLiv(l).cls">{{ statLiv(l).label }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Production du jour</h3>
+            <button class="card-link" (click)="naviguer('production')">Voir tout →</button>
+          </div>
+          @for (p of ds.productions; track p.id) {
+            <div class="pr-item">
+              <span class="pr-nom">{{ p.produit }}</span>
+              <div class="pr-bar">
+                <div class="pr-fill" [class]="statProd(p).cls" [style.width.%]="pctProd(p)"></div>
+              </div>
+              <span class="pr-pct">{{ pctProd(p) }}%</span>
+              <span class="badge" [class]="statProd(p).cls">{{ statProd(p).label }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ────────── VUE LIVREURS ────────── -->
+    @if (vue() === 'livreurs') {
+      <div class="gd-content">
+        <div class="content-header">
+          <div>
+            <h2>👷 Équipe de livraison</h2>
+            <p>{{ livreursActifs() }} livreurs actifs sur {{ livreurs().length }}</p>
+          </div>
+          <button class="btn-primary" (click)="showFormLivreur.set(true)">+ Nouveau livreur</button>
+        </div>
+
+        <div class="kpis-4">
+          <div class="kpi-card kc-or">
+            <div class="kc-top"><span class="kc-ico">👷</span></div>
+            <div class="kc-val">{{ livreurs().length }}</div>
+            <div class="kc-lbl">Total équipe</div>
+          </div>
+          <div class="kpi-card kc-vert">
+            <div class="kc-top"><span class="kc-ico">✅</span></div>
+            <div class="kc-val">{{ livreursActifs() }}</div>
+            <div class="kc-lbl">Actifs</div>
+          </div>
+          <div class="kpi-card kc-rose">
+            <div class="kc-top"><span class="kc-ico">📦</span></div>
+            <div class="kc-val">{{ totalCmdEquipe() }}</div>
+            <div class="kc-lbl">Cmd aujourd'hui</div>
+          </div>
+          <div class="kpi-card kc-or">
+            <div class="kc-top"><span class="kc-ico">💰</span></div>
+            <div class="kc-val" style="font-size: 13px">{{ fmtCFA(totalMontantEquipe()) }}</div>
+            <div class="kc-lbl">Montant collecté</div>
+          </div>
+        </div>
+
+        <div class="chips-row">
+          <button [class.active]="filtreStatut() === 'tous'" (click)="setFiltreStatut('tous')">
+            Tous
+          </button>
+          <button [class.active]="filtreStatut() === 'actif'" (click)="setFiltreStatut('actif')">
+            Actifs
+          </button>
+          <button
+            [class.active]="filtreStatut() === 'en_conge'"
+            (click)="setFiltreStatut('en_conge')"
+          >
+            En congé
+          </button>
+          <button
+            [class.active]="filtreStatut() === 'inactif'"
+            (click)="setFiltreStatut('inactif')"
+          >
+            Inactifs
+          </button>
+        </div>
+
+        <div class="livreurs-grid">
+          @for (lr of livreursFiltres(); track lr.id) {
+            <div class="lr-card card">
+              <div class="lrc-top">
+                <div class="lrc-ava">{{ initiales(lr) }}</div>
+                <div class="lrc-info">
+                  <span class="lrc-nom">{{ lr.prenom }} {{ lr.nom }}</span>
+                  <span class="lrc-zone">📍 {{ lr.zone }}</span>
+                </div>
+                <span class="badge" [class]="statLivreur(lr.statut).cls">{{
+                  statLivreur(lr.statut).label
+                }}</span>
+              </div>
+              <div class="lrc-details">
+                <div>
+                  <span>📞</span><span>{{ lr.telephone }}</span>
+                </div>
+                <div>
+                  <span>🏍️</span><span>{{ lr.moto }}</span>
+                </div>
+                <div>
+                  <span>📅</span><span>Depuis {{ lr.dateEmbauche }}</span>
+                </div>
+              </div>
+              <div class="lrc-kpis">
+                <div class="lrk">
+                  <span class="lrk-v">{{ lr.commandesToday }}</span>
+                  <span class="lrk-l">Cmd aujourd'hui</span>
+                </div>
+                <div class="lrk">
+                  <span class="lrk-v" [style.font-size]="lr.montantToday > 0 ? '13px' : '20px'">
+                    {{ lr.montantToday > 0 ? fmtCFA(lr.montantToday) : '—' }}
+                  </span>
+                  <span class="lrk-l">Montant collecté</span>
+                </div>
+              </div>
+              <div class="lrc-actions">
+                <button class="btn-secondary btn-sm" (click)="toggleStatut(lr)">
+                  {{ lr.statut === 'actif' ? '⏸ Congé' : '▶ Activer' }}
+                </button>
+                <button class="btn-secondary btn-sm">✏️ Modifier</button>
+                <button class="btn-danger btn-sm" (click)="supprimerLivreur(lr.id)">🗑</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ────────── VUE LIVRAISONS ────────── -->
+    @if (vue() === 'livraisons') {
+      <div class="gd-content">
+        <div class="content-header">
+          <div>
+            <h2>🚚 Suivi des livraisons</h2>
+            <p>{{ ds.livraisons.length }} livraisons aujourd'hui</p>
+          </div>
+        </div>
+
+        <div class="kpis-4">
+          <div class="kpi-card kc-rose">
+            <div class="kc-top"><span class="kc-ico">📋</span></div>
+            <div class="kc-val">{{ ds.livraisons.length }}</div>
+            <div class="kc-lbl">Total</div>
+          </div>
+          <div class="kpi-card kc-vert">
+            <div class="kc-top"><span class="kc-ico">✅</span></div>
+            <div class="kc-val">{{ livsTerminees() }}</div>
+            <div class="kc-lbl">Livrées</div>
+          </div>
+          <div class="kpi-card kc-or">
+            <div class="kc-top"><span class="kc-ico">🔄</span></div>
+            <div class="kc-val">{{ livsEnCours() }}</div>
+            <div class="kc-lbl">En cours</div>
+          </div>
+          <div class="kpi-card kc-rouge">
+            <div class="kc-top"><span class="kc-ico">⏰</span></div>
+            <div class="kc-val">{{ livsEnRetard() }}</div>
+            <div class="kc-lbl">En retard</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table class="data-tbl">
+              <thead>
+                <tr>
+                  <th>Livreur</th>
+                  <th>Zone</th>
+                  <th class="hide-sm">Commandes</th>
+                  <th>Montant</th>
+                  <th class="hide-sm">Heure</th>
+                  <th>Statut</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (l of ds.livraisons; track l.id) {
+                  <tr [class.sel]="livraisonSel()?.id === l.id" (click)="selLiv(l)">
+                    <td>
+                      <div class="td-user">
+                        <div class="td-ava">{{ l.livreurNom[0] }}</div>
+                        <span>{{ l.livreurNom }}</span>
+                      </div>
+                    </td>
+                    <td>📍 {{ l.zone }}</td>
+                    <td class="hide-sm">
+                      <strong>{{ l.commandes }}</strong>
+                    </td>
+                    <td>
+                      <strong>{{ fmtCFA(l.montant) }}</strong>
+                    </td>
+                    <td class="hide-sm">{{ l.heure }}</td>
+                    <td>
+                      <span class="badge" [class]="statLiv(l).cls">{{ statLiv(l).label }}</span>
+                    </td>
+                    <td>
+                      @if (l.statut === 'en_retard') {
+                        <button class="btn-alert">⚠️ Alerter</button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        @if (livraisonSel()) {
+          <div class="card detail-panel">
+            <div class="dp-head">
+              <h4>Détail — {{ livraisonSel()!.livreurNom }}</h4>
+              <button (click)="livraisonSel.set(null)">✕</button>
+            </div>
+            <div class="dp-grid">
+              <div>
+                <small>Zone</small><strong>{{ livraisonSel()!.zone }}</strong>
+              </div>
+              <div>
+                <small>Commandes</small><strong>{{ livraisonSel()!.commandes }}</strong>
+              </div>
+              <div>
+                <small>Montant</small><strong>{{ fmtCFA(livraisonSel()!.montant) }}</strong>
+              </div>
+              <div>
+                <small>Statut</small>
+                <span class="badge" [class]="statLiv(livraisonSel()!).cls">
+                  {{ statLiv(livraisonSel()!).label }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ────────── VUE PRODUCTION ────────── -->
+    @if (vue() === 'production') {
+      <div class="gd-content">
+        <div class="content-header">
+          <div>
+            <h2>🏭 Production du jour</h2>
+            <p>{{ prodsEnCours() }} ligne(s) en cours</p>
+          </div>
+        </div>
+        <div class="prod-grid">
+          @for (p of ds.productions; track p.id) {
+            <div class="prod-card card">
+              <div class="pc-head">
+                <span class="pc-nom">{{ p.produit }}</span>
+                <span class="badge" [class]="statProd(p).cls">{{ statProd(p).label }}</span>
+              </div>
+              <div class="pc-boul">👨‍🍳 {{ p.boulanger }}</div>
+              <div class="prog-row">
+                <div class="prog-bar">
+                  <div
+                    class="prog-fill"
+                    [class]="statProd(p).cls"
+                    [style.width.%]="pctProd(p)"
+                  ></div>
+                </div>
+                <span class="prog-pct">{{ pctProd(p) }}%</span>
+              </div>
+              <div class="pc-qty">
+                <span
+                  >Réalisé : <strong>{{ p.quantiteRealisee }}</strong></span
+                >
+                <span
+                  >Planifié : <strong>{{ p.quantitePlanifiee }}</strong></span
+                >
+              </div>
+              @if (p.statut === 'probleme') {
+                <div class="pc-alerte">⚠️ Intervention requise</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ────────── VUE VENTES ────────── -->
+    @if (vue() === 'ventes') {
+      <div class="gd-content">
+        <div class="content-header">
+          <div>
+            <h2>💰 Analyse des ventes</h2>
+            <p>Performances commerciales du jour</p>
+          </div>
+        </div>
+
+        <div class="kpis-4">
+          <div class="kpi-card kc-rose">
+            <div class="kc-top"><span class="kc-ico">💰</span></div>
+            <div class="kc-val" style="font-size: 14px">{{ fmtCFA(totalVentes()) }}</div>
+            <div class="kc-lbl">Ventes totales</div>
+          </div>
+          <div class="kpi-card kc-vert">
+            <div class="kc-top"><span class="kc-ico">📦</span></div>
+            <div class="kc-val">{{ totalCommandes() }}</div>
+            <div class="kc-lbl">Commandes</div>
+          </div>
+          <div class="kpi-card kc-or">
+            <div class="kc-top"><span class="kc-ico">📈</span></div>
+            <div class="kc-val" style="font-size: 13px">{{ fmtCFA(panierMoyen()) }}</div>
+            <div class="kc-lbl">Panier moyen</div>
+          </div>
+          <div class="kpi-card kc-vert">
+            <div class="kc-top"><span class="kc-ico">🚚</span></div>
+            <div class="kc-val">{{ livsTerminees() }}</div>
+            <div class="kc-lbl">Livraisons ok</div>
+          </div>
+        </div>
+
+        <div class="card chart-big">
+          <div class="card-head"><h3>Ventes par heure</h3></div>
+          <div class="bar-chart big">
+            @for (v of ds.ventesHeure; track v.heure) {
+              <div class="bc-col">
+                <span class="bc-amount">{{ (v.ventes / 1000).toFixed(0) }}k</span>
+                <div class="bc-wrap">
+                  <div class="bc-bar" [style.height.%]="(v.ventes / maxVentes()) * 92 + 8"></div>
+                </div>
+                <span class="bc-lbl">{{ v.heure }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ BOTTOM NAV MOBILE ══ -->
+    <nav class="bottom-nav">
+      @for (item of nav; track item.id) {
+        <button class="bn-btn" [class.active]="vue() === item.id" (click)="naviguer(item.id)">
+          <span class="bn-ico">{{ item.ico }}</span>
+          <span class="bn-lbl">{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+  </div>
+  <!-- /gd-main -->
+
+  <!-- ══ MODAL NOUVEAU LIVREUR ══ -->
+  <!-- ══ MODAL NOUVEAU LIVREUR ══ -->
+  @if (showFormLivreur()) {
+    <div class="modal-bg" (click)="showFormLivreur.set(false)">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="mb-head">
+          <h3>👷 Nouveau livreur</h3>
+          <button (click)="showFormLivreur.set(false)">✕</button>
+        </div>
+        <div class="mb-form">
+          <div class="f2">
+            <div class="frow">
+              <label>Prénom *</label>
+              <input
+                type="text"
+                [ngModel]="newLivreur().prenom"
+                (ngModelChange)="setNouveauPrenom($event)"
+              />
+            </div>
+            <div class="frow">
+              <label>Nom *</label>
+              <input
+                type="text"
+                [ngModel]="newLivreur().nom"
+                (ngModelChange)="setNouveauNom($event)"
+              />
+            </div>
+          </div>
+          <div class="f2">
+            <div class="frow">
+              <label>Téléphone *</label>
+              <input
+                type="tel"
+                placeholder="+221 77…"
+                [ngModel]="newLivreur().telephone"
+                (ngModelChange)="setNouveauTelephone($event)"
+              />
+            </div>
+            <div class="frow">
+              <label>Zone</label>
+              <select [ngModel]="newLivreur().zone" (ngModelChange)="setNouveauZone($event)">
+                <option value="">-- Choisir --</option>
+                @for (z of zones; track z) {
+                  <option [value]="z">{{ z }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="f2">
+            <div class="frow">
+              <label>Moto / Véhicule</label>
+              <input
+                type="text"
+                placeholder="Honda CB 125…"
+                [ngModel]="newLivreur().moto"
+                (ngModelChange)="setNouveauMoto($event)"
+              />
+            </div>
+            <div class="frow">
+              <label>Date d'embauche</label>
+              <input
+                type="date"
+                [ngModel]="newLivreur().dateEmbauche"
+                (ngModelChange)="setNouveauDateEmbauche($event)"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="mb-actions">
+          <button class="btn-secondary" (click)="showFormLivreur.set(false)">Annuler</button>
+          <button class="btn-primary" (click)="ajouterLivreur()">✅ Créer le profil</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

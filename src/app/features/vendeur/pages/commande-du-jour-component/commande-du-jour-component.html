@@ -1,0 +1,53 @@
+<div class="page-view">
+  <div class="pv-head">
+    <h2>📋 Commandes du jour</h2>
+  </div>
+
+  <!-- KPIS -->
+  <div class="kpis-row">
+    <div class="kpis-card">
+      <span class="kv">{{ commandesJour() }}</span>
+      <span class="kl">Total</span>
+    </div>
+    <div class="kpis-card success">
+      <span class="kv">{{ cmdAnnulees() }}</span>
+      <span class="kl">Encaissées</span>
+    </div>
+    <div class="kpis-card danger">
+      <span class="kv">{{ nbAnnules() }}</span>
+      <span class="kl">Annulées</span>
+    </div>
+    <div class="kpis-card or">
+      <span class="kv small">{{ fmtCFA(ventesJour()) }}</span>
+      <span class="kl">CA</span>
+    </div>
+  </div>
+
+  <!-- Message flash -->
+  @if (flashSucces()) {
+    <div class="succes-flash">✅ Nouvelle vente ajoutée !</div>
+  }
+
+  <!-- Liste des commandes -->
+  <div class="list-cards">
+    @for (v of historique(); track v.id) {
+      <div class="cmd-card" [class.annule]="v.statut === 'annule'">
+        <span class="cmd-ico">{{ modeIco(v.mode) }}</span>
+        <div class="cmd-info">
+          <span class="cmd-id">Commande #{{ v.id }}</span>
+          <span class="cmd-meta">
+            {{ v.date | date:'HH:mm' }} · {{ v.articles }} article(s)
+          </span>
+        </div>
+        <div class="cmd-right">
+          <span class="cmd-total">{{ fmtCFA(v.total) }}</span>
+          <span class="badge" 
+                [class.success]="v.statut === 'ok'" 
+                [class.danger]="v.statut === 'annule'">
+            {{ v.statut === 'ok' ? 'Encaissé' : 'Annulé' }}
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+</div>

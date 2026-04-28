@@ -1,0 +1,87 @@
+<div class="page-view">
+  <div class="pv-head">
+    <h2>📊 Mes ventes du jour</h2>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-row">
+    <div class="kpis-card">
+      <span class="kv small">{{ fmtCFA(totalEncaisse()) }}</span>
+      <span class="kl">Total encaissé</span>
+    </div>
+    <div class="kpis-card success">
+      <span class="kv">{{ nbVentes() }}</span>
+      <span class="kl">Ventes réussies</span>
+    </div>
+    <div class="kpis-card or">
+      <span class="kv small">{{ fmtCFA(panierMoyen()) }}</span>
+      <span class="kl">Panier moyen</span>
+    </div>
+    <div class="kpis-card">
+      <span class="kv">{{ nbMobile() }}</span>
+      <span class="kl">Paiements mobile</span>
+    </div>
+  </div>
+
+  <!-- Répartition des modes de paiement -->
+  <div class="card histo-modes">
+    <h3>Répartition des modes de paiement</h3>
+    <div class="mode-line">
+      <span class="ml-ico">💵</span>
+      <span class="ml-lbl">Espèces</span>
+      <div class="ml-bar">
+        <div class="ml-fill" [style.width.%]="pctEspeces()"></div>
+      </div>
+      <span class="ml-nb">{{ nbEspeces() }}</span>
+    </div>
+    <div class="mode-line">
+      <span class="ml-ico">💳</span>
+      <span class="ml-lbl">Carte</span>
+      <div class="ml-bar">
+        <div class="ml-fill" [style.width.%]="pctCarte()"></div>
+      </div>
+      <span class="ml-nb">{{ nbCarte() }}</span>
+    </div>
+    <div class="mode-line">
+      <span class="ml-ico">📱</span>
+      <span class="ml-lbl">Mobile</span>
+      <div class="ml-bar">
+        <div class="ml-fill" [style.width.%]="pctMobile()"></div>
+      </div>
+      <span class="ml-nb">{{ nbMobile() }}</span>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="chips-row">
+    <button [class.active]="filtreHisto() === 'tout'" (click)="setFiltreHisto('tout')">
+      Tout
+    </button>
+    <button [class.active]="filtreHisto() === 'ok'" (click)="setFiltreHisto('ok')">
+      Encaissées
+    </button>
+    <button [class.active]="filtreHisto() === 'annule'" (click)="setFiltreHisto('annule')">
+      Annulées
+    </button>
+  </div>
+
+  <!-- Liste des ventes -->
+  <div class="list-cards">
+    @for (v of histoFiltre(); track v.id) {
+      <div class="histo-item" [class.annule]="v.statut === 'annule'">
+        <span class="hi-num">#{{ v.id }}</span>
+        <span class="hi-ico">{{ modeIco(v.mode) }}</span>
+        <div class="hi-info">
+          <span>{{ modeLabel(v.mode) }} · {{ v.articles }} art.</span>
+          <small>{{ v.date | date:'HH:mm' }}</small>
+        </div>
+        <div class="hi-right">
+          <span class="hi-total">{{ fmtCFA(v.total) }}</span>
+          <span class="badge" [class.success]="v.statut === 'ok'" [class.danger]="v.statut === 'annule'">
+            {{ v.statut === 'ok' ? '✓ OK' : '✕ Annulé' }}
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+</div>

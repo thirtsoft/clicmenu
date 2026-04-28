@@ -1,0 +1,53 @@
+<div class="vd-shell">
+  <!-- Topbar -->
+  <header class="vd-topbar">
+    <button class="hamburger-btn" (click)="sidebarOpen.set(true)" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="vt-brand">🍽️ <span>ClicMenu</span></div>
+    <div class="vt-info">
+      <span class="vt-kpi">{{ fmtCFA(ventesJour()) }}</span>
+      <span class="vt-sep">·</span>
+      <span>{{ commandesJour() }} cmd</span>
+    </div>
+    <div class="vt-time">{{ heure }}</div>
+  </header>
+
+  <div class="vd-body">
+    <!-- Backdrop mobile -->
+    @if (sidebarOpen()) {
+      <div class="sidebar-backdrop" (click)="sidebarOpen.set(false)"></div>
+    }
+
+    <!-- Sidebar -->
+    <app-side-bar-vendeur-component
+      [isOpen]="sidebarOpen()"
+      [vueActive]="vueActive()"
+      [ventesJour]="ventesJour()"
+      [commandesJour]="commandesJour()"
+      [clientsJour]="clientsJour()"
+      (close)="sidebarOpen.set(false)"
+      (navigate)="naviguer($event)"
+    ></app-side-bar-vendeur-component>
+
+    <!-- Zone de contenu dynamique -->
+    <div class="vd-view">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+  <!-- Bottom nav mobile -->
+  <nav class="bottom-nav">
+    @for (item of navMobilesItems; track item.id) {
+      <button class="bn-btn" [class.active]="vueActive() === item.id" (click)="naviguer(item.id)">
+        <span class="bn-ico">{{ item.ico }}</span>
+        <span class="bn-lbl">{{ item.label }}</span>
+      </button>
+    }
+
+    <button class="bn-btn" [class.active]="!vueActive()" (click)="deconnecter()">
+      <span class="bn-ico">🔓</span>
+      <span class="bn-lbl">Déconnexion</span>
+    </button>
+  </nav>
+</div>

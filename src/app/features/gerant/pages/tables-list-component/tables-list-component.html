@@ -1,0 +1,263 @@
+<!-- ────────── VUE TABLES ────────── -->
+@if (vue() === 'tables') {
+  <div class="gd-content">
+    <div class="content-header">
+      <div>
+        <h2>🪑 Gestion des tables</h2>
+        <p>{{ tablesOccupees() }} tables occupées sur {{ tables().length }}</p>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-secondary" (click)="showFormReservation.set(true)">
+          📅 Nouvelle réservation
+        </button>
+        <button class="btn-primary" (click)="showFormTable.set(true)">+ Nouvelle table</button>
+      </div>
+    </div>
+
+    <div class="kpis-4">
+      <div class="kpi-card kc-or">
+        <div class="kc-top"><span class="kc-ico">🪑</span></div>
+        <div class="kc-val">{{ tables().length }}</div>
+        <div class="kc-lbl">Total tables</div>
+      </div>
+      <div class="kpi-card kc-vert">
+        <div class="kc-top"><span class="kc-ico">✅</span></div>
+        <div class="kc-val">{{ tablesLibres() }}</div>
+        <div class="kc-lbl">Tables libres</div>
+      </div>
+      <div class="kpi-card kc-rose">
+        <div class="kc-top"><span class="kc-ico">🍽️</span></div>
+        <div class="kc-val">{{ tablesOccupees() }}</div>
+        <div class="kc-lbl">Tables occupées</div>
+      </div>
+      <div class="kpi-card kc-or">
+        <div class="kc-top"><span class="kc-ico">📅</span></div>
+        <div class="kc-val">{{ tablesReservees() }}</div>
+        <div class="kc-lbl">Tables réservées</div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <button [class.active]="filtreStatut() === 'tous'" (click)="setFiltreStatut('tous')">
+        Toutes ({{ tables().length }})
+      </button>
+      <button [class.active]="filtreStatut() === 'occupee'" (click)="setFiltreStatut('occupee')">
+        🍽️ Occupées ({{ tablesOccupees() }})
+      </button>
+      <button [class.active]="filtreStatut() === 'libre'" (click)="setFiltreStatut('libre')">
+        ✅ Libres ({{ tablesLibres() }})
+      </button>
+      <button [class.active]="filtreStatut() === 'reservee'" (click)="setFiltreStatut('reservee')">
+        📅 Réservées ({{ tablesReservees() }})
+      </button>
+    </div>
+
+    <div class="tables-grid">
+      @for (t of tablesFiltrees(); track t.id) {
+        <div class="table-card card" [class.occupee]="t.statut === 'occupee'">
+          <div class="tbc-top">
+            <div class="tbc-ico">{{ t.statut === 'occupee' ? '🍽️' : '🪑' }}</div>
+            <div class="tbc-info">
+              <span class="tbc-nom">{{ t.nom }}</span>
+              <span class="tbc-zone">📍 {{ t.zone }}</span>
+            </div>
+            <span class="badge" [class]="statTable(t.statut).cls">{{
+              statTable(t.statut).label
+            }}</span>
+          </div>
+          <div class="tbc-details">
+            <div>
+              <span>👥</span><span>{{ t.couverts }} couverts</span>
+            </div>
+            <div>
+              <span>📋</span><span>{{ t.commandesEnCours }} commande(s)</span>
+            </div>
+            @if (t.statut === 'occupee') {
+              <div>
+                <span>🕐</span><span>Depuis {{ t.heureOccupation }}</span>
+              </div>
+            }
+          </div>
+          @if (t.statut === 'occupee') {
+            <div class="tbc-client">
+              <div class="tbc-client-ava">{{ initialesClient(t.clientNom || 'Client') }}</div>
+              <div>
+                <span class="tbc-client-nom">{{ t.clientNom || 'Client' }}</span>
+                @if (t.heureOccupation) {
+                  <span class="tbc-client-heure">Installé à {{ t.heureOccupation }}</span>
+                }
+              </div>
+            </div>
+          }
+          <div class="tbc-kpis">
+            <div class="tbk">
+              <span class="tbk-v">{{ t.commandesToday }}</span>
+              <span class="tbk-l">Cmd aujourd'hui</span>
+            </div>
+            <div class="tbk">
+              <span class="tbk-v" [style.font-size]="t.montantToday > 0 ? '13px' : '20px'">
+                {{ t.montantToday > 0 ? fmtCFA(t.montantToday) : '—' }}
+              </span>
+              <span class="tbk-l">Montant total</span>
+            </div>
+          </div>
+          <div class="tbc-actions">
+            <button class="btn-secondary btn-sm" (click)="toggleTableStatut(t)">
+              {{
+                t.statut === 'occupee'
+                  ? '✅ Libérer'
+                  : t.statut === 'libre'
+                    ? '▶ Occuper'
+                    : '📅 Confirmer'
+              }}
+            </button>
+            <button class="btn-secondary btn-sm">✏️ Modifier</button>
+            <button class="btn-danger btn-sm" (click)="supprimerTable(t.id)">🗑</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ────────── MODAL NOUVELLE TABLE ────────── -->
+@if (showFormTable()) {
+  <div class="modal-bg" (click)="showFormTable.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>🪑 Nouvelle table</h3>
+        <button (click)="showFormTable.set(false)">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="f2">
+          <div class="frow">
+            <label>Nom de la table *</label>
+            <input
+              type="text"
+              placeholder="Ex: Table 5"
+              [ngModel]="newTable().nom"
+              (ngModelChange)="setNouveauNomTable($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Zone *</label>
+            <select [ngModel]="newTable().zone" (ngModelChange)="setNouveauZoneTable($event)">
+              <option value="">-- Choisir --</option>
+              @for (z of zonesRestaurant; track z) {
+                <option [value]="z">{{ z }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="frow">
+          <label>Nombre de couverts *</label>
+          <input
+            type="number"
+            min="1"
+            max="20"
+            placeholder="2, 4, 6..."
+            [ngModel]="newTable().couverts"
+            (ngModelChange)="setNouveauCouvertsTable($event)"
+          />
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="showFormTable.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="ajouterTable()">✅ Créer la table</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ────────── MODAL RÉSERVATION ────────── -->
+@if (showFormReservation()) {
+  <div class="modal-bg" (click)="showFormReservation.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>📅 Nouvelle réservation</h3>
+        <button (click)="showFormReservation.set(false)">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="frow">
+          <label>Table *</label>
+          <select
+            [ngModel]="newReservation().tableId"
+            (ngModelChange)="setReservationTable($event)"
+          >
+            <option value="">-- Choisir une table --</option>
+            @for (t of tablesDisponibles(); track t.id) {
+              <option [value]="t.id">{{ t.nom }} ({{ t.couverts }} couverts - {{ t.zone }})</option>
+            }
+          </select>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Nom du client *</label>
+            <input
+              type="text"
+              placeholder="Ex: M. Diop"
+              [ngModel]="newReservation().clientNom"
+              (ngModelChange)="setReservationClient($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Téléphone</label>
+            <input
+              type="tel"
+              placeholder="+221 77..."
+              [ngModel]="newReservation().telephone"
+              (ngModelChange)="setReservationTelephone($event)"
+            />
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Date *</label>
+            <input
+              type="date"
+              [ngModel]="newReservation().date"
+              (ngModelChange)="setReservationDate($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Heure *</label>
+            <input
+              type="time"
+              [ngModel]="newReservation().heure"
+              (ngModelChange)="setReservationHeure($event)"
+            />
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Nombre de personnes *</label>
+            <input
+              type="number"
+              min="1"
+              max="20"
+              placeholder="2, 4, 6..."
+              [ngModel]="newReservation().nbPersonnes"
+              (ngModelChange)="setReservationNbPersonnes($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Notes</label>
+            <textarea
+              rows="2"
+              placeholder="Demande spéciale..."
+              [ngModel]="newReservation().notes"
+              (ngModelChange)="setReservationNotes($event)"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="showFormReservation.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="ajouterReservation()">
+          ✅ Confirmer la réservation
+        </button>
+      </div>
+    </div>
+  </div>
+}

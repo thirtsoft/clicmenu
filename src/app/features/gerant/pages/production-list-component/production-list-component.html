@@ -1,0 +1,106 @@
+<!-- ────────── VUE PRODUCTION ────────── -->
+@if (vue() === 'production') {
+  <div class="gd-content">
+    <div class="content-header">
+      <div>
+        <h2>🏭 Production du jour</h2>
+        <p>{{ prodsEnCours() }} ligne(s) en cours</p>
+      </div>
+      <button class="btn-primary" (click)="showFormProduction.set(true)">
+        + Nouveau planification
+      </button>
+    </div>
+    <div class="prod-grid">
+      @for (p of ds.productions; track p.id) {
+        <div class="prod-card card">
+          <div class="pc-head">
+            <span class="pc-nom">{{ p.produit }}</span>
+            <span class="badge" [class]="statProd(p).cls">{{ statProd(p).label }}</span>
+          </div>
+          <div class="pc-boul">👨‍🍳 {{ p.boulanger }}</div>
+          <div class="prog-row">
+            <div class="prog-bar">
+              <div class="prog-fill" [class]="statProd(p).cls" [style.width.%]="pctProd(p)"></div>
+            </div>
+            <span class="prog-pct">{{ pctProd(p) }}%</span>
+          </div>
+          <div class="pc-qty">
+            <span
+              >Réalisé : <strong>{{ p.quantiteRealisee }}</strong></span
+            >
+            <span
+              >Planifié : <strong>{{ p.quantitePlanifiee }}</strong></span
+            >
+          </div>
+          @if (p.statut === 'probleme') {
+            <div class="pc-alerte">⚠️ Intervention requise</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (showFormProduction()) {
+  <div class="modal-bg" (click)="showFormProduction.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>👷 Planification production</h3>
+        <button (click)="showFormProduction.set(false)">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="f2">
+          <div class="frow">
+            <label>Libellé *</label>
+            <input
+              type="text"
+              [ngModel]="newProduction().libelle"
+              (ngModelChange)="setLibelle($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Quantité *</label>
+            <input
+              type="number"
+              [ngModel]="newProduction().quantite"
+              (ngModelChange)="setQuantite($event)"
+            />
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Description *</label>
+            <input
+              type="text"
+              [ngModel]="newProduction().description"
+              (ngModelChange)="setDescription($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Employées</label>
+            <select [ngModel]="newProduction().employees" (ngModelChange)="setEmployees($event)">
+              <option value="">-- Choisir --</option>
+              @for (z of employees; track z) {
+                <option [value]="z">{{ z }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Date d'embauche</label>
+            <input
+              type="date"
+              [ngModel]="newProduction().dateEmbauche"
+              (ngModelChange)="setDateProduction($event)"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="showFormProduction.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="ajouterProduction()">✅ Créer la production</button>
+      </div>
+    </div>
+  </div>
+}

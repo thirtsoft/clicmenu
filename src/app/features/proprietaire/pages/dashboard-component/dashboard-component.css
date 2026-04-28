@@ -1,0 +1,965 @@
+.dashboard-container {
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--gris-doux);
+}
+
+.kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gris-fonce);
+  margin: 0;
+}
+
+.boulangeries-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(193, 101, 74, 0.08);
+}
+
+.boulangerie-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.boulangerie-icon {
+  font-size: 24px;
+  background: var(--pain-cream);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.boulangerie-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.boulangerie-nom {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gris-fonce);
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.boulangerie-adresse {
+  font-size: 11px;
+  color: var(--gris-moyen);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tendance-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tendance-badge.success {
+  background: rgba(107, 143, 94, 0.12);
+  color: #6B8F5E;
+}
+
+.tendance-badge.danger {
+  background: rgba(193, 101, 74, 0.12);
+  color: var(--pain-deep);
+}
+
+.tendance-badge.info {
+  background: rgba(58, 80, 104, 0.12);
+  color: #3A5068;
+}
+
+.boulangerie-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-principal {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gris-fonce);
+}
+
+.stat-secondaire {
+  font-size: 11px;
+  color: var(--gris-moyen);
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--pain-cream);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.progress-fill.success {
+  background: #6B8F5E;
+}
+
+.progress-fill.warning {
+  background: #D4943A;
+}
+
+.progress-fill.danger {
+  background: var(--pain-deep);
+}
+
+.progress-value {
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
+}
+
+.progress-value.success {
+  color: #6B8F5E;
+}
+
+.progress-value.warning {
+  color: #D4943A;
+}
+
+.progress-value.danger {
+  color: var(--pain-deep);
+}
+
+.flag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.flag.success {
+  background: rgba(107, 143, 94, 0.1);
+  color: #6B8F5E;
+}
+
+.flag.warning {
+  background: rgba(193, 101, 74, 0.1);
+  color: var(--pain-deep);
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-card {
+  padding: 24px;
+}
+
+.chart-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--gris-fonce);
+  margin: 0 0 20px 0;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 150px;
+}
+
+.bar-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  gap: 8px;
+}
+
+.bar-wrapper {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  background: linear-gradient(180deg, var(--pain-blush), var(--pain-deep));
+  border-radius: 6px 6px 0 0;
+  min-height: 4px;
+  transition: height 0.5s ease;
+}
+
+.bar-value {
+  font-size: 10px;
+  color: var(--gris-moyen);
+  transform: rotate(-30deg);
+  white-space: nowrap;
+}
+
+.bar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gris-fonce);
+}
+
+.comparison-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comparison-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comparison-label {
+  font-size: 13px;
+  font-weight: 600;
+  width: 70px;
+  flex-shrink: 0;
+  color: var(--gris-fonce);
+}
+
+.comparison-bar-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  background: var(--gris-doux);
+  border-radius: 99px;
+  position: relative;
+}
+
+.comparison-bar {
+  height: 100%;
+  border-radius: 99px;
+  min-width: 20px;
+  transition: width 0.5s ease;
+}
+
+.comparison-bar.success {
+  background: linear-gradient(90deg, #5A8050, #6B8F5E);
+}
+
+.comparison-bar.warning {
+  background: linear-gradient(90deg, #B8882A, #D4943A);
+}
+
+.comparison-bar.danger {
+  background: linear-gradient(90deg, #A04535, var(--pain-rose));
+}
+
+.comparison-value {
+  position: absolute;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gris-fonce);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .boulangeries-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .kpis-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .boulangeries-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .boulangerie-card {
+    padding: 16px;
+  }
+
+  .stat-principal {
+    font-size: 18px;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .bar-chart {
+    height: 120px;
+  }
+
+  .bar-value {
+    font-size: 8px;
+    transform: rotate(-45deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .card-header {
+    flex-wrap: wrap;
+  }
+
+  .tendance-badge {
+    margin-left: auto;
+  }
+
+  .boulangerie-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .comparison-label {
+    width: 50px;
+    font-size: 12px;
+  }
+
+  .comparison-value {
+    font-size: 10px;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD PROPRIÉTAIRE RESTAURANT
+   ═══════════════════════════════════════════════ */
+
+.dashboard-container {
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--gris-doux);
+}
+
+/* ── KPIs ─────────────────────────────────────────── */
+.kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ── Sections ─────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gris-fonce);
+  margin: 0;
+}
+
+.sections-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ── Cards ────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.08);
+}
+
+.section-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.section-icon {
+  font-size: 24px;
+  background: #FAE5D3;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.section-nom {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gris-fonce);
+  margin: 0 0 4px 0;
+}
+
+.section-commandes {
+  font-size: 11px;
+  color: var(--gris-moyen);
+  margin: 0;
+}
+
+.tendance-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tendance-badge.success {
+  background: rgba(107, 143, 94, 0.12);
+  color: #6B8F5E;
+}
+
+.tendance-badge.danger {
+  background: rgba(193, 101, 74, 0.12);
+  color: #C1654A;
+}
+
+.tendance-badge.info {
+  background: rgba(58, 80, 104, 0.12);
+  color: #3A5068;
+}
+
+/* ── Stats ────────────────────────────────────────── */
+.section-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-principal {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gris-fonce);
+}
+
+.stat-secondaire {
+  font-size: 11px;
+  color: var(--gris-moyen);
+}
+
+/* ── Barre de progression ─────────────────────────── */
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #FAE5D3;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.progress-fill.success {
+  background: #6B8F5E;
+}
+
+.progress-fill.warning {
+  background: #D4943A;
+}
+
+.progress-fill.danger {
+  background: #C1654A;
+}
+
+.progress-value {
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
+}
+
+.progress-value.success {
+  color: #6B8F5E;
+}
+
+.progress-value.warning {
+  color: #D4943A;
+}
+
+.progress-value.danger {
+  color: #C1654A;
+}
+
+.flag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.flag.success {
+  background: rgba(107, 143, 94, 0.1);
+  color: #6B8F5E;
+}
+
+.flag.warning {
+  background: rgba(193, 101, 74, 0.1);
+  color: #C1654A;
+}
+
+/* ── Charts grid ──────────────────────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-card {
+  padding: 24px;
+}
+
+.chart-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--gris-fonce);
+  margin: 0 0 20px 0;
+}
+
+/* ── Bar chart ventes semaine ─────────────────────── */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 150px;
+}
+
+.bar-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  gap: 8px;
+}
+
+.bar-wrapper {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  background: linear-gradient(180deg, #E8A050, #8B4513);
+  border-radius: 6px 6px 0 0;
+  min-height: 4px;
+  transition: height 0.5s ease;
+}
+
+.bar.today {
+  background: linear-gradient(180deg, #D2691E, #5C3317);
+}
+
+.bar-value {
+  font-size: 10px;
+  color: var(--gris-moyen);
+  transform: rotate(-30deg);
+  white-space: nowrap;
+}
+
+.bar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gris-fonce);
+}
+
+/* ── Top plats ────────────────────────────────────── */
+.top-plats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.top-plat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: #FFF5EC;
+  border-radius: 8px;
+}
+
+.tp-ico {
+  font-size: 24px;
+}
+
+.tp-info {
+  flex: 1;
+}
+
+.tp-nom {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gris-fonce);
+}
+
+.tp-qty {
+  display: block;
+  font-size: 11px;
+  color: var(--gris-moyen);
+  margin-top: 2px;
+}
+
+.tp-montant {
+  font-weight: 700;
+  font-size: 13px;
+  color: #8B4513;
+}
+
+/* ── Commandes récentes ───────────────────────────── */
+.commandes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.commande-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #F5F0EE;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.cmd-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cmd-table {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.cmd-serveur {
+  font-size: 10px;
+  color: var(--gris-moyen);
+}
+
+.cmd-center {
+  text-align: center;
+}
+
+.cmd-plats {
+  display: block;
+  font-size: 11px;
+  color: var(--gris-moyen);
+}
+
+.cmd-montant {
+  display: block;
+  font-weight: 700;
+  font-size: 12px;
+  color: #8B4513;
+}
+
+.cmd-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.cmd-temps {
+  font-size: 10px;
+  color: var(--gris-moyen);
+}
+
+.cmd-statut {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 700;
+}
+
+.badge.warning {
+  background: rgba(212, 148, 58, 0.15);
+  color: #D4943A;
+}
+
+.badge.success {
+  background: rgba(107, 143, 94, 0.15);
+  color: #6B8F5E;
+}
+
+.badge.info {
+  background: rgba(58, 80, 104, 0.15);
+  color: #3A5068;
+}
+
+.badge.danger {
+  background: rgba(193, 101, 74, 0.15);
+  color: #C1654A;
+}
+
+/* ── Alertes stock ────────────────────────────────── */
+.stock-ok {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  gap: 8px;
+  color: #6B8F5E;
+}
+
+.stock-ok span {
+  font-size: 32px;
+}
+
+.stock-ok p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.alertes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alerte-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #FFF5EC;
+  border-radius: 8px;
+  border-left: 3px solid #D4943A;
+}
+
+.alerte-item.rupture {
+  background: #FFF0F0;
+  border-left-color: #C1654A;
+}
+
+.al-ico {
+  font-size: 20px;
+}
+
+.al-info {
+  flex: 1;
+}
+
+.al-nom {
+  display: block;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--gris-fonce);
+}
+
+.al-stock {
+  display: block;
+  font-size: 10px;
+  color: var(--gris-moyen);
+  margin-top: 2px;
+}
+
+.al-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.al-badge.warning {
+  background: rgba(212, 148, 58, 0.15);
+  color: #D4943A;
+}
+
+.al-badge.danger {
+  background: rgba(193, 101, 74, 0.15);
+  color: #C1654A;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sections-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .kpis-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sections-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .section-card {
+    padding: 16px;
+  }
+
+  .stat-principal {
+    font-size: 18px;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .bar-chart {
+    height: 120px;
+  }
+
+  .bar-value {
+    font-size: 8px;
+    transform: rotate(-45deg);
+  }
+
+  .commande-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .cmd-right {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-header {
+    flex-wrap: wrap;
+  }
+
+  .tendance-badge {
+    margin-left: auto;
+  }
+
+  .section-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}

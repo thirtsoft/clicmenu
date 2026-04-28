@@ -1,0 +1,49 @@
+<div class="catalogue-section card">
+  <div class="filtres-bar">
+    <div class="categories-chips">
+      @for (cat of categories(); track cat) {
+        <button
+          class="cat-btn"
+          [class.active]="categorieActive() === cat"
+          (click)="categorieChange.emit(cat)"
+        >
+          {{ cat }}
+        </button>
+      }
+    </div>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="🔍 Rechercher un produit..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchChange.emit($event)"
+    />
+  </div>
+
+  <div class="produits-grid">
+    @for (produit of produits(); track produit.id) {
+      <div
+        class="produit-card"
+        [class.in-cart]="getQuantitePanier()(produit.id) > 0"
+        (click)="ajouterAuPanier.emit(produit)"
+      >
+        <span class="produit-icone">{{ produit.icone }}</span>
+        <span class="produit-nom">{{ produit.nom }}</span>
+        <span class="produit-prix"
+          >{{ formatCFA(produit.prixUnitaire) }} / {{ produit.unite }}</span
+        >
+        @if (produit.stock !== undefined) {
+          <span class="produit-stock">Stock: {{ produit.stock }}</span>
+        }
+        @if (getQuantitePanier()(produit.id) > 0) {
+          <div class="produit-qty-badge">{{ getQuantitePanier()(produit.id) }}</div>
+        }
+      </div>
+    } @empty {
+      <div class="empty-produits">
+        <span>📦</span>
+        <p>Aucun produit trouvé</p>
+      </div>
+    }
+  </div>
+</div>

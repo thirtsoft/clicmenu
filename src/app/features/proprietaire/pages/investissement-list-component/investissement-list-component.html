@@ -1,0 +1,102 @@
+   <!-- ══ SECTION INVESTISSEMENTS ══ -->
+    @if (sectionActive() === 'investissements') {
+      <div class="section-content">
+        <!-- KPIs investissements -->
+        <div class="invest-kpis">
+          <div class="card ik">
+            <span class="ik-ico">💼</span>
+            <span class="ik-val">{{ formatCFAFull(totalInvesti()) }}</span>
+            <span class="ik-lbl">Total investi (réalisé)</span>
+          </div>
+          <div class="card ik">
+            <span class="ik-ico">📅</span>
+            <span class="ik-val">{{ formatCFAFull(totalPlanifie()) }}</span>
+            <span class="ik-lbl">Investissements planifiés</span>
+          </div>
+          <div class="card ik">
+            <span class="ik-ico">✅</span>
+            <span class="ik-val">{{ realiseInvestissementsCount() }}</span>
+            <span class="ik-lbl">Projets réalisés</span>
+          </div>
+          <div class="card ik">
+            <span class="ik-ico">🔄</span>
+            <span class="ik-val">{{ enCoursInvestissementsCount() }}</span>
+            <span class="ik-lbl">Projets en cours</span>
+          </div>
+        </div>
+
+        <!-- Filtres + bouton -->
+        <div class="section-toolbar">
+          <div class="invest-filtres">
+            <div class="filtre-group">
+              <label>Catégorie</label>
+              <div class="chips-row">
+                @for (cat of categoriesInvest; track cat) {
+                  <button
+                    class="chip-btn"
+                    [class.active]="filtreCatInvest() === cat"
+                    (click)="filtreCatInvest.set(cat)"
+                  >
+                    {{ cat }}
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="filtre-group">
+              <label>Statut</label>
+              <div class="chips-row">
+                @for (s of ['Tout', 'planifie', 'en_cours', 'realise']; track s) {
+                  <button
+                    class="chip-btn"
+                    [class.active]="filtreStatutInvest() === s"
+                    (click)="filtreStatutInvest.set(s)"
+                  >
+                    {{ s }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" (click)="showFormInvest.set(true)">
+            + Nouvel investissement
+          </button>
+        </div>
+
+        <!-- Liste investissements -->
+        <div class="invest-list">
+          @for (inv of investsFiltres(); track inv.id) {
+            <div class="invest-card card" [class]="'invest-' + inv.statut">
+              <div class="inv-left">
+                <div class="inv-ico-wrap">{{ getCatInvestIco(inv.categorie) }}</div>
+              </div>
+              <div class="inv-body">
+                <div class="inv-top">
+                  <div class="inv-titre">{{ inv.titre }}</div>
+                  <div class="inv-tags">
+                    <span class="chip-lbl">{{ inv.categorie }}</span>
+                    <span class="badge" [class]="getStatutInvest(inv.statut).cls">{{
+                      getStatutInvest(inv.statut).label
+                    }}</span>
+                  </div>
+                </div>
+                <div class="inv-desc">{{ inv.description }}</div>
+                <div class="inv-meta">
+                  <span>🏪 {{ inv.boulangerie }}</span>
+                  <span>📅 {{ inv.date }}</span>
+                  @if (inv.retourEstime > 0) {
+                    <span>⏱ ROI estimé : {{ inv.retourEstime }} mois</span>
+                  }
+                </div>
+              </div>
+              <div class="inv-right">
+                <div class="inv-montant">{{ formatCFAFull(inv.montant) }}</div>
+                <div class="inv-actions">
+                  <button class="btn-secondary btn-sm">✏️</button>
+                  <button class="btn-danger btn-sm">🗑</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }

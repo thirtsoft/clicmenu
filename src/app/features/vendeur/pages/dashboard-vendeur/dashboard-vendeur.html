@@ -1,0 +1,414 @@
+<!-- dashboard-vendeur.html -->
+<div class="vd-shell">
+
+  <!-- ══ TOPBAR ══ -->
+  <header class="vd-topbar">
+    <button class="hamburger-btn" (click)="sidebarOpen.set(true)" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="vt-brand">🥐 <span>Boulangerie Rose</span></div>
+    <div class="vt-info">
+      <span class="vt-kpi">{{ fmtCFA(ventesJour()) }}</span>
+      <span class="vt-sep">·</span>
+      <span>{{ commandesJour() }} cmd</span>
+    </div>
+    <div class="vt-time">{{ heure }}</div>
+  </header>
+
+  <!-- ══ BODY ══ -->
+  <div class="vd-body">
+
+    <!-- Backdrop -->
+    @if (sidebarOpen()) {
+      <div class="sidebar-backdrop" (click)="sidebarOpen.set(false)"></div>
+    }
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="vd-sidebar" [class.is-open]="sidebarOpen()">
+      <button class="sidebar-close" (click)="sidebarOpen.set(false)">✕</button>
+
+      <div class="vs-brand">
+        <div class="vs-logo">🥐</div>
+        <div>
+          <div class="vs-nom">Rose</div>
+          <div class="vs-sub">Boulangerie</div>
+        </div>
+      </div>
+
+      <div class="vs-profil">
+        <div class="vs-ava">A</div>
+        <div>
+          <div class="vs-pnom">Aminata Diallo</div>
+          <div class="vs-role">Vendeuse · Plateau</div>
+        </div>
+      </div>
+
+      <div class="vs-kpis">
+        <div class="vsk-card">
+          <span class="vsk-val">{{ fmtCFA(ventesJour()) }}</span>
+          <span class="vsk-lbl">Ventes du jour</span>
+        </div>
+        <div class="vsk-row">
+          <div class="vsk-pill"><span>🛒</span>{{ commandesJour() }} cmd</div>
+          <div class="vsk-pill"><span>👥</span>{{ clientsJour() }} clients</div>
+        </div>
+      </div>
+
+      <nav class="vs-nav">
+        @for (item of nav; track item.id) {
+          <button class="vsn-item" [class.active]="vue() === item.id"
+            (click)="naviguer(item.id)">
+            <span class="vsn-ico">{{ item.ico }}</span>
+            <span>{{ item.label }}</span>
+          </button>
+        }
+      </nav>
+    </aside>
+
+    <!-- ── ZONE DE VUE ── -->
+    <div class="vd-view">
+
+      <!-- ●●● CAISSE ●●● -->
+      @if (vue() === 'caisse') {
+        <div class="caisse-layout">
+
+          <!-- Catalogue -->
+          <main class="catalogue">
+            <div class="cat-header">
+              <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" placeholder="Rechercher…"
+                  [ngModel]="search()" (ngModelChange)="search.set($event)" />
+              </div>
+              <div class="heure-chip">{{ heure }}</div>
+            </div>
+            <div class="cat-chips">
+              @for (c of categories; track c) {
+                <button [class.active]="catActive() === c" (click)="catActive.set(c)">{{ c }}</button>
+              }
+            </div>
+            <div class="produits-grid">
+              @for (p of produitsFiltres(); track p.id) {
+                <div class="prod-card"
+                  [class.in-cart]="qtyDansPanier(p.id) > 0"
+                  [class.rupture]="p.stock === 0"
+                  (click)="addProduit(p)">
+                  <div class="pc-ico">{{ p.icone }}</div>
+                  <div class="pc-nom">{{ p.nom }}</div>
+                  <div class="pc-cat">{{ p.categorie }}</div>
+                  <div class="pc-prix">{{ fmtCFA(p.prix) }}</div>
+                  <div class="pc-stock" [class.low]="p.stock < 10">{{ p.stock }} rest.</div>
+                  @if (qtyDansPanier(p.id) > 0) {
+                    <div class="pc-badge">{{ qtyDansPanier(p.id) }}</div>
+                  }
+                </div>
+              }
+            </div>
+          </main>
+
+          <!-- Panier desktop -->
+          <aside class="panier">
+            <div class="pan-head">
+              <h3>Commande en cours</h3>
+              <span class="pan-count">{{ nbArticles() }}</span>
+            </div>
+            @if (flashSucces()) {
+              <div class="succes-flash">✅ Encaissement réussi !</div>
+            }
+            <div class="pan-lines">
+              @if (panier().length === 0) {
+                <div class="pan-vide"><span>🛒</span><p>Panier vide</p></div>
+              }
+              @for (l of panier(); track l.produit.id) {
+                <div class="pan-line">
+                  <span class="pl-ico">{{ l.produit.icone }}</span>
+                  <div class="pl-info">
+                    <span>{{ l.produit.nom }}</span>
+                    <small>{{ fmtCFA(l.produit.prix) }}/u.</small>
+                  </div>
+                  <div class="pl-qty">
+                    <button (click)="changeQty(l.produit.id, -1)">−</button>
+                    <span>{{ l.quantite }}</span>
+                    <button (click)="changeQty(l.produit.id, +1)">+</button>
+                  </div>
+                  <span class="pl-tot">{{ fmtCFA(l.sousTotal) }}</span>
+                </div>
+              }
+            </div>
+            <div class="pan-pay">
+              <div class="pay-lbl">Mode de paiement</div>
+              <div class="pay-modes">
+                @for (m of modesPaiement; track m.id) {
+                  <button [class.active]="modePay() === m.id" (click)="modePay.set(m.id)">
+                    <span>{{ m.ico }}</span>
+                    <span>{{ m.label }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="pan-footer">
+              @if (panier().length > 0) {
+                <div class="pf-row"><span>Sous-total</span><span>{{ fmtCFA(total()) }}</span></div>
+                <div class="pf-row tva"><span>TVA 18%</span><span>{{ fmtCFA(Math.round(total() * 0.18)) }}</span></div>
+              }
+              <div class="pf-ttc"><span>Total TTC</span><span>{{ fmtCFA(totalTTC()) }}</span></div>
+              <button class="btn-encaisser" [disabled]="panier().length === 0" (click)="encaisser()">
+                💰 Encaisser
+              </button>
+              @if (panier().length > 0) {
+                <button class="btn-vider" (click)="viderPanier()">Vider le panier</button>
+              }
+            </div>
+          </aside>
+        </div>
+
+        <!-- FAB Panier mobile -->
+        @if (panier().length > 0) {
+          <div class="fab-panier" (click)="panierOpen.set(true)">
+            <span>🛒</span>
+            <span class="fab-nb">{{ nbArticles() }} article(s)</span>
+            <span class="fab-total">{{ fmtCFA(total()) }}</span>
+            <span class="fab-arrow">▲</span>
+          </div>
+        }
+
+        <!-- Drawer Panier mobile -->
+        @if (panierOpen()) {
+          <div class="drawer-bg" (click)="panierOpen.set(false)"></div>
+          <div class="panier-drawer">
+            <div class="dr-handle"></div>
+            <div class="pan-head">
+              <h3>Commande en cours</h3>
+              <button class="btn-close-drawer" (click)="panierOpen.set(false)">✕</button>
+            </div>
+            <div class="pan-lines scrollable">
+              @for (l of panier(); track l.produit.id) {
+                <div class="pan-line">
+                  <span class="pl-ico">{{ l.produit.icone }}</span>
+                  <div class="pl-info">
+                    <span>{{ l.produit.nom }}</span>
+                    <small>{{ fmtCFA(l.produit.prix) }}/u.</small>
+                  </div>
+                  <div class="pl-qty">
+                    <button (click)="changeQty(l.produit.id, -1)">−</button>
+                    <span>{{ l.quantite }}</span>
+                    <button (click)="changeQty(l.produit.id, +1)">+</button>
+                  </div>
+                  <span class="pl-tot">{{ fmtCFA(l.sousTotal) }}</span>
+                </div>
+              }
+            </div>
+            <div class="pan-pay">
+              <div class="pay-lbl">Paiement</div>
+              <div class="pay-modes">
+                @for (m of modesPaiement; track m.id) {
+                  <button [class.active]="modePay() === m.id" (click)="modePay.set(m.id)">
+                    <span>{{ m.ico }}</span>
+                    <span>{{ m.label }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="pan-footer pb-safe">
+              <div class="pf-ttc"><span>Total TTC</span><span>{{ fmtCFA(totalTTC()) }}</span></div>
+              <button class="btn-encaisser" (click)="encaisser()">
+                💰 Encaisser {{ fmtCFA(totalTTC()) }}
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- ●●● COMMANDES ●●● -->
+      @if (vue() === 'commandes') {
+        <div class="page-view">
+          <div class="pv-head"><h2>📋 Commandes du jour</h2></div>
+          <div class="kpis-row">
+            <div class="kpis-card">
+              <span class="kv">{{ commandesJour() }}</span>
+              <span class="kl">Total</span>
+            </div>
+            <div class="kpis-card success">
+              <span class="kv">{{ cmdAnnulees() }}</span>
+              <span class="kl">Encaissées</span>
+            </div>
+            <div class="kpis-card danger">
+              <span class="kv">{{ nbAnnules() }}</span>
+              <span class="kl">Annulées</span>
+            </div>
+            <div class="kpis-card or">
+              <span class="kv small">{{ fmtCFA(ventesJour()) }}</span>
+              <span class="kl">CA</span>
+            </div>
+          </div>
+          @if (flashSucces()) {
+            <div class="succes-flash">✅ Nouvelle vente ajoutée !</div>
+          }
+          <div class="list-cards">
+            @for (v of historique(); track v.id) {
+              <div class="cmd-card" [class.annule]="v.statut === 'annule'">
+                <span class="cmd-ico">{{ modeIco(v.mode) }}</span>
+                <div class="cmd-info">
+                  <span class="cmd-id">Commande #{{ v.id }}</span>
+                  <span class="cmd-meta">{{ v.date | date:'HH:mm' }} · {{ v.articles }} article(s)</span>
+                </div>
+                <div class="cmd-right">
+                  <span class="cmd-total">{{ fmtCFA(v.total) }}</span>
+                  <span class="badge" [class.success]="v.statut==='ok'" [class.danger]="v.statut==='annule'">
+                    {{ v.statut === 'ok' ? 'Encaissé' : 'Annulé' }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ●●● STOCK ●●● -->
+      @if (vue() === 'stock') {
+        <div class="page-view">
+          <div class="pv-head">
+            <h2>📦 État du stock</h2>
+            <span class="badge danger">{{ nbAlerteStock() }} alertes</span>
+          </div>
+          <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" placeholder="Rechercher un produit…"
+              [ngModel]="stockSearch()" (ngModelChange)="stockSearch.set($event)" />
+          </div>
+          <div class="list-cards">
+            @for (p of stockFiltre(); track p.id) {
+              <div class="stock-item" [class]="'si-' + stockCls(p.stock)">
+                <span class="si-ico">{{ p.icone }}</span>
+                <div class="si-info">
+                  <span class="si-nom">{{ p.nom }}</span>
+                  <span class="si-cat">{{ p.categorie }}</span>
+                </div>
+                <div class="si-bar-wrap">
+                  <div class="si-bar">
+                    <div class="si-fill" [class]="stockCls(p.stock)"
+                      [style.width.%]="Math.min(p.stock / 50 * 100, 100)"></div>
+                  </div>
+                  <span class="si-qty" [class]="stockCls(p.stock)">{{ p.stock }}</span>
+                </div>
+                <span class="badge" [class]="stockCls(p.stock)">{{ stockLabel(p.stock) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ●●● HISTORIQUE ●●● -->
+      @if (vue() === 'historique') {
+        <div class="page-view">
+          <div class="pv-head"><h2>📊 Mes ventes du jour</h2></div>
+
+          <div class="kpis-row">
+            <div class="kpis-card">
+              <span class="kv small">{{ fmtCFA(totalEncaisse()) }}</span>
+              <span class="kl">Total encaissé</span>
+            </div>
+            <div class="kpis-card success">
+              <span class="kv">{{ nbVentes() }}</span>
+              <span class="kl">Ventes réussies</span>
+            </div>
+            <div class="kpis-card or">
+              <span class="kv small">{{ fmtCFA(panierMoyen()) }}</span>
+              <span class="kl">Panier moyen</span>
+            </div>
+            <div class="kpis-card">
+              <span class="kv">{{ nbMobile() }}</span>
+              <span class="kl">Paiements mobile</span>
+            </div>
+          </div>
+
+          <!-- Répartition modes de paiement -->
+          <div class="card histo-modes">
+            <h3>Répartition des modes de paiement</h3>
+            <div class="mode-line">
+              <span class="ml-ico">💵</span>
+              <span class="ml-lbl">Espèces</span>
+              <div class="ml-bar"><div class="ml-fill" [style.width.%]="pctEspeces()"></div></div>
+              <span class="ml-nb">{{ nbEspeces() }}</span>
+            </div>
+            <div class="mode-line">
+              <span class="ml-ico">💳</span>
+              <span class="ml-lbl">Carte</span>
+              <div class="ml-bar"><div class="ml-fill" [style.width.%]="pctCarte()"></div></div>
+              <span class="ml-nb">{{ nbCarte() }}</span>
+            </div>
+            <div class="mode-line">
+              <span class="ml-ico">📱</span>
+              <span class="ml-lbl">Mobile</span>
+              <div class="ml-bar"><div class="ml-fill" [style.width.%]="pctMobile()"></div></div>
+              <span class="ml-nb">{{ nbMobile() }}</span>
+            </div>
+          </div>
+
+          <!-- Filtres -->
+          <div class="chips-row">
+            <button [class.active]="filtreHisto() === 'tout'"   (click)="setFiltreHisto('tout')">Tout</button>
+            <button [class.active]="filtreHisto() === 'ok'"     (click)="setFiltreHisto('ok')">Encaissées</button>
+            <button [class.active]="filtreHisto() === 'annule'" (click)="setFiltreHisto('annule')">Annulées</button>
+          </div>
+
+          <!-- Liste ventes -->
+          <div class="list-cards">
+            @for (v of histoFiltre(); track v.id) {
+              <div class="histo-item" [class.annule]="v.statut === 'annule'">
+                <span class="hi-num">#{{ v.id }}</span>
+                <span class="hi-ico">{{ modeIco(v.mode) }}</span>
+                <div class="hi-info">
+                  <span>{{ modeLabel(v.mode) }} · {{ v.articles }} art.</span>
+                  <small>{{ v.date | date:'HH:mm' }}</small>
+                </div>
+                <div class="hi-right">
+                  <span class="hi-total">{{ fmtCFA(v.total) }}</span>
+                  <span class="badge"
+                    [class.success]="v.statut==='ok'"
+                    [class.danger]="v.statut==='annule'">
+                    {{ v.statut === 'ok' ? '✓ OK' : '✕ Annulé' }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div><!-- /vd-view -->
+  </div><!-- /vd-body -->
+
+  <!-- ══ BOTTOM NAV MOBILE ══ -->
+  <nav class="bottom-nav">
+    @for (item of nav; track item.id) {
+      <button class="bn-btn" [class.active]="vue() === item.id" (click)="naviguer(item.id)">
+        <span class="bn-ico">{{ item.ico }}</span>
+        <span class="bn-lbl">{{ item.label }}</span>
+      </button>
+    }
+  </nav>
+
+  <!-- ══ MODAL CONFIRMATION ══ -->
+  @if (showModal()) {
+    <div class="modal-bg" (click)="fermerModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="mc-top">
+          <span>🧾</span>
+          <h2>Confirmation</h2>
+          <p>Vérifiez avant de valider</p>
+        </div>
+        <div class="mc-rows">
+          <div><span>Articles</span><span>{{ nbArticles() }}</span></div>
+          <div><span>Montant TTC</span><strong>{{ fmtCFA(totalTTC()) }}</strong></div>
+          <div><span>Paiement</span><span>{{ modeLabel(modePay()) }}</span></div>
+        </div>
+        <div class="mc-actions">
+          <button class="btn-secondary" (click)="fermerModal()">Annuler</button>
+          <button class="btn-primary" (click)="valider()">✅ Valider</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

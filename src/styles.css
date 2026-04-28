@@ -1,1 +1,229 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Pain/Bread Color Palette */
+  --pain-deep: #C1654A;
+  --pain-rose: #E8856A;
+  --pain-blush: #F2A98A;
+  --pain-cream: #FBE8DC;
+  --pain-light: #FDF4EF;
+  --pain-warm: #F7D5C2;
+
+  /* Neutrals */
+  --blanc: #FFFFFF;
+  --blanc-casse: #FDFAF8;
+  --gris-doux: #F5F0ED;
+  --gris-moyen: #B8A9A3;
+  --gris-fonce: #5C4A44;
+  --noir-chaud: #2C1F1A;
+
+  /* Accents */
+  --or: #D4943A;
+  --vert-herbe: #6B8F5E;
+  --bleu-nuit: #3A5068;
+
+  /* Status */
+  --success: #6B8F5E;
+  --warning: #D4943A;
+  --danger: #C1654A;
+  --info: #3A5068;
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 20px rgba(193, 101, 74, 0.08);
+  --shadow-medium: 0 8px 40px rgba(193, 101, 74, 0.14);
+  --shadow-strong: 0 20px 60px rgba(193, 101, 74, 0.22);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--blanc-casse);
+  color: var(--noir-chaud);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pain-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pain-blush);
+  border-radius: 3px;
+}
+
+/* Global Card */
+.card {
+  background: var(--blanc);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(232, 133, 106, 0.1);
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--pain-rose), var(--pain-deep));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(193, 101, 74, 0.35);
+  }
+}
+
+.btn-secondary {
+  background: var(--pain-cream);
+  color: var(--pain-deep);
+  border: 1.5px solid var(--pain-blush);
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--pain-warm);
+  }
+}
+
+/* Chip/Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+
+  &.success {
+    background: rgba(107, 143, 94, 0.12);
+    color: var(--vert-herbe);
+  }
+
+  &.warning {
+    background: rgba(212, 148, 58, 0.12);
+    color: var(--or);
+  }
+
+  &.danger {
+    background: rgba(193, 101, 74, 0.12);
+    color: var(--pain-deep);
+  }
+
+  &.info {
+    background: rgba(58, 80, 104, 0.12);
+    color: var(--bleu-nuit);
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+//  BASE RESPONSIVE GLOBALS
+// ══════════════════════════════════════════════════════════════════ */
+
+html {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+.btn-primary,
+.btn-secondary {
+  min-height: 36px;
+  touch-action: manipulation;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+.hide-mobile {}
+
+.show-mobile {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: flex !important;
+  }
+
+  .btn-full-mobile {
+    width: 100% !important;
+  }
+
+  .card {
+    border-radius: var(--radius-md);
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    scrollbar-width: none;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 3px 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 22px;
+  }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 768px) {
+
+    .pos-shell .panier,
+    .gerant-shell,
+    .prop-shell {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}

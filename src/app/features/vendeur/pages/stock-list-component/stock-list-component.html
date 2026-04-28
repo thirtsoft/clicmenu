@@ -1,0 +1,38 @@
+<div class="page-view">
+  <div class="pv-head">
+    <h2>📦 État du stock</h2>
+    <span class="badge danger">{{ nbAlerteStock() }} alertes</span>
+  </div>
+
+  <!-- Barre de recherche -->
+  <div class="search-bar">
+    <span>🔍</span>
+    <input type="text" 
+           placeholder="Rechercher un produit…"
+           [ngModel]="stockSearch()" 
+           (ngModelChange)="stockSearch.set($event)" />
+  </div>
+
+  <!-- Liste des produits -->
+  <div class="list-cards">
+    @for (p of stockFiltre(); track p.id) {
+      <div class="stock-item" [class]="'si-' + stockCls(p.stock)">
+        <span class="si-ico">{{ p.icone }}</span>
+        <div class="si-info">
+          <span class="si-nom">{{ p.nom }}</span>
+          <span class="si-cat">{{ p.categorie }}</span>
+        </div>
+        <div class="si-bar-wrap">
+          <div class="si-bar">
+            <div class="si-fill" [class]="stockCls(p.stock)"
+                 [style.width.%]="Math.min(p.stock / 50 * 100, 100)"></div>
+          </div>
+          <span class="si-qty" [class]="stockCls(p.stock)">{{ p.stock }}</span>
+        </div>
+        <span class="badge" [class]="stockCls(p.stock)">
+          {{ stockLabel(p.stock) }}
+        </span>
+      </div>
+    }
+  </div>
+</div>

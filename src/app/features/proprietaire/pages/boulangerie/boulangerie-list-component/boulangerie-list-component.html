@@ -1,0 +1,155 @@
+<!-- ══ SECTION BOULANGERIES ══ -->
+@if (sectionActive() === 'boulangeries') {
+  <div class="section-content">
+    <div class="section-toolbar">
+      <div class="stb-stats">
+        <span>{{ boulangeries().length }} établissements</span>
+        <span class="badge success">{{ activeBoulangeriesCount() }} actifs</span>
+      </div>
+      <button class="btn-primary" (click)="showFormBoulangerie.set(true)">
+        + Nouvelle boulangerie
+      </button>
+    </div>
+
+    <div class="b-table-grid">
+      @for (b of boulangeries(); track b.id) {
+        <div class="blist-card card">
+          <div class="blc-header">
+            <div class="blc-icon">🏪</div>
+            <div class="blc-meta">
+              <div class="blc-nom">{{ b.nom }}</div>
+              <div class="blc-addr">{{ b.adresse }}, {{ b.ville }}</div>
+            </div>
+            <span class="badge" [class]="getStatutBoulangerie(b.statut).cls">{{
+              getStatutBoulangerie(b.statut).label
+            }}</span>
+          </div>
+          <div class="blc-details">
+            <div class="blc-row">
+              <span>📞</span><span>{{ b.telephone }}</span>
+            </div>
+            <div class="blc-row">
+              <span>👤</span
+              ><span
+                >Gérant : <strong>{{ b.gerantNom }}</strong></span
+              >
+            </div>
+            <div class="blc-row">
+              <span>📐</span><span>{{ b.superficie }} m²</span>
+            </div>
+            <div class="blc-row">
+              <span>📅</span><span>Ouverte le {{ b.dateOuverture }}</span>
+            </div>
+          </div>
+          <div class="blc-kpis">
+            <div class="blc-kpi">
+              <span class="blck-val">{{ formatCFA(b.ventesJour) }}</span>
+              <span class="blck-lbl">Ventes / jour</span>
+            </div>
+            <div class="blc-kpi">
+              <span class="blck-val" [class]="getTauxCls(b.taux)">{{ b.taux }}%</span>
+              <span class="blck-lbl">Taux objectif</span>
+            </div>
+            <div class="blc-kpi">
+              <span class="blck-val">{{ b.commandesJour }}</span>
+              <span class="blck-lbl">Commandes</span>
+            </div>
+          </div>
+          <div class="blc-actions">
+            <button class="btn-secondary btn-sm">✏️ Modifier</button>
+            <button class="btn-danger btn-sm" (click)="supprimerBoulangerie(b.id)">
+              🗑 Supprimer
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL NOUVELLE BOULANGERIE ══ -->
+@if (showFormBoulangerie()) {
+  <div class="modal-overlay" (click)="showFormBoulangerie.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🏪 Ajouter une boulangerie</h3>
+        <button (click)="showFormBoulangerie.set(false)">✕</button>
+      </div>
+      <div class="modal-form">
+        <div class="form-row">
+          <label>Nom de la boutique *</label>
+          <input
+            type="text"
+            placeholder="ex : Rose — Sacré-Cœur"
+            [ngModel]="nouveauBoulangerie().nom"
+            (change)="updateGerantBoulangerieId($event)"
+          />
+        </div>
+        <div class="form-row-2">
+          <div class="form-row">
+            <label>Adresse *</label>
+            <input
+              type="text"
+              placeholder="Rue, avenue…"
+              [ngModel]="nouveauBoulangerie().adresse"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+          <div class="form-row">
+            <label>Ville</label>
+            <input
+              type="text"
+              placeholder="Dakar"
+              [ngModel]="nouveauBoulangerie().ville"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-row">
+            <label>Téléphone</label>
+            <input
+              type="tel"
+              placeholder="+221 77 …"
+              [ngModel]="nouveauBoulangerie().telephone"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+          <div class="form-row">
+            <label>Superficie (m²)</label>
+            <input
+              type="number"
+              placeholder="100"
+              [ngModel]="nouveauBoulangerie().superficie"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-row">
+            <label>Nom du gérant</label>
+            <input
+              type="text"
+              placeholder="Prénom Nom"
+              [ngModel]="nouveauBoulangerie().gerantNom"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+          <div class="form-row">
+            <label>Objectif journalier (FCFA)</label>
+            <input
+              type="number"
+              placeholder="250000"
+              [ngModel]="nouveauBoulangerie().objectifJour"
+              (change)="updateGerantBoulangerieId($event)"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="showFormBoulangerie.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="ajouterBoulangerie()">✅ Créer la boulangerie</button>
+      </div>
+    </div>
+  </div>
+}

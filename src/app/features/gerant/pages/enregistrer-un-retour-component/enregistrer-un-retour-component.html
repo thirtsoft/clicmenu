@@ -1,0 +1,130 @@
+<div class="section-content appro-layout">
+  <div class="appro-left">
+    <div class="card appro-target">
+      <label class="field-label"
+        >Passer la commande pour :
+
+        <input
+          type="checkbox"
+          [checked]="showCommandeLivreur()"
+          (change)="onChangeCommande($event)"
+        />
+        Livreur
+
+        <input
+          type="checkbox"
+          [checked]="showCommandeFournisseur()"
+          (change)="onChangeCommande($event)"
+        />
+        Fournisseur
+      </label>
+
+      <div class="b-chips">
+        @for (b of livreurs(); track b.id) {
+          <button
+            class="b-chip"
+            [class.active]="boulangerieApproSelectee() === b.id"
+            (click)="boulangerieApproSelectee.set(b.id)"
+          >
+            {{ b.prenom }} - {{ b.nom }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="appro-cats">
+      @for (cat of categoriesFiltreAppro(); track cat) {
+        <button
+          class="cat-btn"
+          [class.active]="categorieProduitAppro() === cat"
+          (click)="categorieProduitAppro.set(cat)"
+        >
+          {{ cat }}
+        </button>
+      }
+    </div>
+
+    <div class="appro-catalogue">
+      @for (p of produitsFiltresAppro(); track p.id) {
+        <div
+          class="appro-prod-card card"
+          [class.in-cart]="getQteAppro(p.id) > 0"
+          (click)="ajouterAppro(p)"
+        >
+          <div class="apc-ico">{{ p.icone }}</div>
+          <div class="apc-info">
+            <div class="apc-nom">{{ p.nom }}</div>
+            <div class="apc-cat">{{ p.categorie }}</div>
+            <div class="apc-prix">{{ formatCFA(p.prixUnitaire) }} / {{ p.unite }}</div>
+          </div>
+          @if (getQteAppro(p.id) > 0) {
+            <div class="apc-qty-badge">{{ getQteAppro(p.id) }}</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="appro-right">
+    <div class="card appro-panier">
+      <div class="ap-header">
+        <h3>🛒 Bon de commande</h3>
+        <span class="badge info">{{ panierAppro().length }} lignes</span>
+      </div>
+      @if (panierAppro().length === 0) {
+        <div class="ap-vide">
+          <span>📦</span>
+          <p>Sélectionnez des produits</p>
+        </div>
+      }
+      <div class="ap-lines">
+        @for (l of panierAppro(); track l.produit.id) {
+          <div class="ap-line">
+            <div class="apl-ico">{{ l.produit.icone }}</div>
+            <div class="apl-info">
+              <span class="apl-nom">{{ l.produit.nom }}</span>
+              <span class="apl-b">→ {{ nomBoulangerie(l.boulangerieId) }}</span>
+            </div>
+            <div class="apl-qty">
+              <button (click)="modifierQteAppro(l.produit.id, -1)">−</button>
+              <span>{{ l.quantite }}</span>
+              <button (click)="modifierQteAppro(l.produit.id, +1)">+</button>
+            </div>
+            <div class="apl-total">{{ formatCFA(l.total) }}</div>
+          </div>
+        }
+      </div>
+      @if (panierAppro().length > 0) {
+        <div class="ap-footer">
+          <div class="ap-total">
+            <span>Total commande</span>
+            <strong>{{ formatCFAFull(totalPanierAppro()) }}</strong>
+          </div>
+          <button class="btn-primary" style="width: 100%" (click)="passerCommande()">
+            📤 Passer la commande
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="card appro-hist">
+      <h3>Commandes récentes</h3>
+      <div class="hist-list">
+        @for (cmd of commandesAppro(); track cmd.id) {
+          <div class="hist-item">
+            <div class="hi-info">
+              <span class="hi-fourn">{{ cmd.fournisseur }}</span>
+              <span class="hi-date">{{ cmd.date | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="hi-right">
+              <span>{{ formatCFAFull(cmd.total) }}</span>
+              <span class="badge" [class]="getStatutAppro(cmd.statut).cls">{{
+                getStatutAppro(cmd.statut).label
+              }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

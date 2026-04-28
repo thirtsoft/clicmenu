@@ -1,0 +1,50 @@
+<div class="layout-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
+
+  <!-- Backdrop mobile -->
+  @if (sidebarOpen()) {
+    <div class="sidebar-backdrop" (click)="sidebarOpen.set(false)"></div>
+  }
+
+  <app-side-bar-proprietaire-component
+    [collapsed]="sidebarCollapsed()"
+    [open]="sidebarOpen()"
+    (toggleCollapse)="onToggleCollapse()"
+    (close)="onSidebarClose()"
+  ></app-side-bar-proprietaire-component>
+
+  <div class="layout-main">
+    <header class="layout-topbar">
+      <div class="topbar-left">
+        <button class="hamburger" (click)="sidebarOpen.set(true)" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <h1 class="page-title">{{ sectionLabel }}</h1>
+      </div>
+
+      <div class="topbar-right">
+        <span class="current-date">{{ todayStr }}</span>
+        <div class="user-info">
+          <div class="user-avatar">P</div>
+          <span class="user-name">Propriétaire</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Router outlet -->
+    <div class="layout-content">
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- ══ BOTTOM NAV MOBILE ══ -->
+    <nav class="bottom-nav">
+      @for (item of nav; track item.route) {
+        <button class="bn-btn" [class.active]="isActive(item.route)" (click)="naviguer(item.route)">
+          <span class="bn-ico">{{ item.ico }}</span>
+          <span class="bn-lbl">{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+  </div>
+</div>

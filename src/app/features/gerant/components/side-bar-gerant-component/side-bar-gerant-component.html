@@ -1,0 +1,46 @@
+<!-- sidebar-gerant.html -->
+<div class="sidebar" [class.collapsed]="collapsed()" [class.drawer-open]="open()">
+  <!-- Brand -->
+  <div class="sb-brand">
+    <div class="sb-logo">🍽️</div>
+    <div class="sb-brand-text">
+      <span class="sb-name">Clicmenu</span>
+      <span class="sb-sub">Gérant</span>
+    </div>
+    <button class="sb-toggle" (click)="toggleCollapse.emit()" title="Réduire">
+      {{ collapsed() ? '→' : '←' }}
+    </button>
+  </div>
+
+  <!-- Profil -->
+  <div class="sb-profile">
+    <div class="sb-ava">G</div>
+    <div class="sb-pinfo">
+      <span class="sb-pnom">Modou Seck</span>
+      <span class="sb-pmail">Gérant · Restaurant</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sb-nav">
+    @for (item of nav; track item.route) {
+      <button
+        class="sb-item"
+        [class.active]="isActive(item.route)"
+        (click)="naviguer(item.route)"
+        [title]="item.label"
+      >
+        <span class="sb-ico">{{ item.ico }}</span>
+        <span class="sb-label">{{ item.label }}</span>
+      </button>
+    }
+  </nav>
+
+  <!-- Footer — Déconnexion -->
+  <div class="sb-footer">
+    <button class="sb-deconnexion" (click)="deconnecter()">
+      <span class="sb-ico">🔓</span>
+      <span class="sb-label">Déconnexion</span>
+    </button>
+  </div>
+</div>

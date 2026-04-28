@@ -1,0 +1,548 @@
+/* ═══════════════════════════════════════════════
+   FINANCES
+   ═══════════════════════════════════════════════ */
+
+.finances-container {
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--gris-doux);
+}
+
+/* ── KPIs ─────────────────────────────────────────── */
+.kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.08);
+  border-left: 4px solid #6B8F5E;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.kc-rose {
+  border-color: #C1654A;
+}
+
+.kc-vert {
+  border-color: #6B8F5E;
+}
+
+.kc-or {
+  border-color: #D4943A;
+}
+
+.kc-violet {
+  border-color: #7B68EE;
+}
+
+.kc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.kc-ico {
+  font-size: 22px;
+}
+
+.kc-var {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: #F5F0EE;
+  color: #8C7B72;
+
+  &.pos {
+    background: rgba(107, 143, 94, 0.12);
+    color: #6B8F5E;
+  }
+
+  &.neg {
+    background: rgba(193, 101, 74, 0.12);
+    color: #C1654A;
+  }
+}
+
+.kc-val {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: #3D3028;
+}
+
+.kc-lbl {
+  font-size: 12px;
+  color: #8C7B72;
+}
+
+/* ── Chips période ────────────────────────────────── */
+.chips-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  button {
+    padding: 8px 18px;
+    border-radius: 99px;
+    border: 1.5px solid #FAE5D3;
+    background: white;
+    color: #3D3028;
+    font-family: var(--font-body);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &.active {
+      background: linear-gradient(135deg, #D2691E, #8B4513);
+      border-color: transparent;
+      color: white;
+      font-weight: 700;
+    }
+
+    &:hover:not(.active) {
+      background: #FFF5EC;
+      border-color: #E8A050;
+    }
+  }
+}
+
+/* ── Charts grid ──────────────────────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.08);
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: #3D3028;
+    margin: 0;
+  }
+}
+
+.card-head-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.chart-card {
+  padding: 24px;
+}
+
+.chart-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: #3D3028;
+  margin: 0 0 20px 0;
+}
+
+/* ── Catégories ───────────────────────────────────── */
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cat-ico {
+  font-size: 18px;
+}
+
+.cat-nom {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3D3028;
+}
+
+.cat-pct {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8C7B72;
+}
+
+.cat-bar-wrapper {
+  width: 100%;
+  height: 8px;
+  background: #FAE5D3;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.cat-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+
+  &.recette {
+    background: linear-gradient(90deg, #5A8050, #6B8F5E);
+  }
+
+  &.depense {
+    background: linear-gradient(90deg, #A04535, #C1654A);
+  }
+
+  &.success {
+    background: linear-gradient(90deg, #5A8050, #6B8F5E);
+  }
+
+  &.warning {
+    background: linear-gradient(90deg, #B8882A, #D4943A);
+  }
+
+  &.danger {
+    background: linear-gradient(90deg, #A04535, #C1654A);
+  }
+}
+
+.cat-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cat-montant {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3D3028;
+}
+
+.cat-budget {
+  font-size: 10px;
+  color: #8C7B72;
+}
+
+/* ── Flux de trésorerie ───────────────────────────── */
+.flux-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 180px;
+  padding: 0 10px;
+}
+
+.flux-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  gap: 8px;
+}
+
+.flux-bars {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.flux-bar {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  min-height: 2px;
+  transition: height 0.5s ease;
+
+  &.recette {
+    background: linear-gradient(180deg, #6B8F5E, #5A8050);
+  }
+
+  &.depense {
+    background: linear-gradient(180deg, #C1654A, #A04535);
+  }
+}
+
+.flux-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8C7B72;
+}
+
+.flux-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #8C7B72;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+
+  &.recette {
+    background: #6B8F5E;
+  }
+
+  &.depense {
+    background: #C1654A;
+  }
+}
+
+/* ── Barre de recherche transactions ──────────────── */
+.search-bar-transaction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F5F0EE;
+  border-radius: 10px;
+  padding: 8px 14px;
+  border: 1.5px solid #FAE5D3;
+
+  input {
+    border: none;
+    outline: none;
+    font-size: 13px;
+    width: 200px;
+    background: transparent;
+    font-family: var(--font-body);
+  }
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 6px;
+
+  button {
+    padding: 7px 14px;
+    border-radius: 99px;
+    border: 1.5px solid #FAE5D3;
+    background: white;
+    color: #3D3028;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+
+    &.active {
+      background: #FFF5EC;
+      border-color: #E8A050;
+      color: #8B4513;
+      font-weight: 700;
+    }
+  }
+}
+
+/* ── Tableau transactions ─────────────────────────── */
+.transactions-table-wrapper {
+  overflow-x: auto;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  thead {
+    border-bottom: 2px solid #FAE5D3;
+
+    th {
+      padding: 14px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #8C7B72;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #FAE5D3;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #FFF5EC;
+      }
+    }
+
+    td {
+      padding: 14px 12px;
+      vertical-align: middle;
+    }
+  }
+}
+
+.tr-date {
+  font-size: 12px;
+  color: #8C7B72;
+  white-space: nowrap;
+}
+
+.tr-description {
+  font-weight: 500;
+  color: #3D3028;
+}
+
+.tr-categorie {
+  display: inline-block;
+  padding: 3px 10px;
+  background: #FFF5EC;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8B4513;
+  white-space: nowrap;
+}
+
+.tr-type {
+  font-size: 12px;
+  font-weight: 600;
+
+  &.success {
+    color: #6B8F5E;
+  }
+
+  &.danger {
+    color: #C1654A;
+  }
+}
+
+.tr-montant {
+  font-weight: 700;
+  font-size: 13px;
+
+  &.positif {
+    color: #6B8F5E;
+  }
+
+  &.negatif {
+    color: #C1654A;
+  }
+}
+
+.tr-paiement {
+  font-size: 12px;
+  color: #8C7B72;
+}
+
+.tr-reference {
+  font-size: 11px;
+  color: #8C7B72;
+  font-family: monospace;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .finances-container {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .kpis-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .kpi-card {
+    padding: 16px;
+  }
+
+  .kc-val {
+    font-size: 20px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .card-head {
+    flex-direction: column;
+  }
+
+  .card-head-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-bar-transaction input {
+    width: 100%;
+  }
+
+  .filter-buttons {
+    flex-wrap: wrap;
+  }
+
+  .transactions-table {
+    font-size: 11px;
+
+    th,
+    td {
+      padding: 10px 8px;
+    }
+  }
+
+  .flux-chart {
+    height: 140px;
+  }
+}

@@ -1,0 +1,209 @@
+<!-- ────────── VUE MENU ────────── -->
+
+<div class="gd-content">
+  <div class="content-header">
+    <div>
+      <h2>📖 Gestion du menu</h2>
+      <p>{{ produits().length }} plats au menu · {{ categories().length }} catégories</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="showFormCategorie.set(true)">
+        📁 Nouvelle catégorie
+      </button>
+      <button class="btn-primary" (click)="showFormPlat.set(true)">+ Nouveau plat</button>
+    </div>
+  </div>
+
+  <div class="kpis-4">
+    <div class="kpi-card kc-or">
+      <div class="kc-top"><span class="kc-ico">🍽️</span></div>
+      <div class="kc-val">{{ produits().length }}</div>
+      <div class="kc-lbl">Plats au menu</div>
+    </div>
+    <div class="kpi-card kc-vert">
+      <div class="kc-top"><span class="kc-ico">✅</span></div>
+      <div class="kc-val">{{ produitsDisponibles() }}</div>
+      <div class="kc-lbl">Plats disponibles</div>
+    </div>
+    <div class="kpi-card kc-rose">
+      <div class="kc-top"><span class="kc-ico">⭐</span></div>
+      <div class="kc-val">{{ platsPopulaires() }}</div>
+      <div class="kc-lbl">Plats populaires</div>
+    </div>
+    <div class="kpi-card kc-or">
+      <div class="kc-top"><span class="kc-ico">📁</span></div>
+      <div class="kc-val">{{ categories().length }}</div>
+      <div class="kc-lbl">Catégories</div>
+    </div>
+  </div>
+
+  <div class="chips-row">
+    <button [class.active]="filtreCategorie() === 'Tout'" (click)="setFiltreCategorie('Tout')">
+      Tout ({{ produits().length }})
+    </button>
+    @for (c of categories(); track c) {
+      <button [class.active]="filtreCategorie() === c" (click)="setFiltreCategorie(c)">
+        {{ c }} ({{ produitsParCategorie(c) }})
+      </button>
+    }
+  </div>
+
+  <div class="menu-grid">
+    @for (p of produitsFiltres(); track p.id) {
+      <div class="menu-card card" [class.indisponible]="p.disponible === false">
+        <div class="mnc-top">
+          <div class="mnc-ico">{{ p.icone }}</div>
+          <div class="mnc-info">
+            <span class="mnc-nom">{{ p.nom }}</span>
+            <span class="mnc-cat">{{ p.categorie }}</span>
+          </div>
+          <span class="badge" [class]="p.disponible ? 'success' : 'danger'">
+            {{ p.disponible ? 'Disponible' : 'Indisponible' }}
+          </span>
+        </div>
+        @if (p.description) {
+          <div class="mnc-desc">{{ p.description }}</div>
+        }
+        <div class="mnc-details">
+          <div>
+            <span>💰</span><span>{{ fmtCFA(p.prix) }}</span>
+          </div>
+          <div>
+            <span>⏱️</span><span>{{ p.tempsPreparation }} min</span>
+          </div>
+          <div>
+            <span>🔥</span><span>{{ p.commandesJour }} cmd/jour</span>
+          </div>
+        </div>
+        @if (p.ingredients && p.ingredients.length > 0) {
+          <div class="mnc-ingredients">
+            <span class="mnc-ing-lbl">Ingrédients :</span>
+            <div class="mnc-ing-list">
+              @for (ing of p.ingredients; track ing) {
+                <span class="mnc-ing-tag">{{ ing }}</span>
+              }
+            </div>
+          </div>
+        }
+        <div class="mnc-actions">
+          <button class="btn-secondary btn-sm" (click)="toggleDisponibilite(p)">
+            {{ p.disponible ? '⏸ Indisponible' : '▶ Rendre disponible' }}
+          </button>
+          <button class="btn-secondary btn-sm">✏️ Modifier</button>
+          <button class="btn-danger btn-sm" (click)="supprimerPlat(p.id)">🗑</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ────────── MODAL NOUVEAU PLAT ────────── -->
+@if (showFormPlat()) {
+  <div class="modal-bg" (click)="showFormPlat.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>🍽️ Nouveau plat</h3>
+        <button (click)="showFormPlat.set(false)">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="f2">
+          <div class="frow">
+            <label>Nom du plat *</label>
+            <input
+              type="text"
+              placeholder="Ex: Poulet Yassa"
+              [ngModel]="newPlat().nom"
+              (ngModelChange)="setNewPlatField('nom', $event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Catégorie *</label>
+            <select
+              [ngModel]="newPlat().categorie"
+              (ngModelChange)="setNewPlatField('categorie', $event)"
+            >
+              <option value="">-- Choisir --</option>
+              @for (c of categories(); track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Prix (FCFA) *</label>
+            <input
+              type="number"
+              placeholder="2500"
+              [ngModel]="newPlat().prix"
+              (ngModelChange)="setNewPlatField('prix', $event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Temps de préparation (min)</label>
+            <input
+              type="number"
+              placeholder="15"
+              [ngModel]="newPlat().tempsPreparation"
+              (ngModelChange)="setNewPlatField('tempsPreparation', $event)"
+            />
+          </div>
+        </div>
+        <div class="frow">
+          <label>Description</label>
+          <textarea
+            rows="2"
+            placeholder="Délicieux poulet mariné..."
+            [ngModel]="newPlat().description"
+            (ngModelChange)="setNewPlatField('description', $event)"
+          >
+          </textarea>
+        </div>
+        <div class="frow">
+          <label>Icône emoji</label>
+          <input
+            type="text"
+            placeholder="🍗"
+            [ngModel]="newPlat().icone"
+            (ngModelChange)="setNewPlatField('icone', $event)"
+          />
+        </div>
+        <div class="frow">
+          <label>Ingrédients (séparés par des virgules)</label>
+          <input
+            type="text"
+            placeholder="Poulet, Oignon, Citron..."
+            [ngModel]="newPlat().ingredientsInput"
+            (ngModelChange)="setNewPlatField('ingredientsInput', $event)"
+          />
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="showFormPlat.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="ajouterPlat()">✅ Créer le plat</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ────────── MODAL NOUVELLE CATÉGORIE ────────── -->
+@if (showFormCategorie()) {
+  <div class="modal-bg" (click)="showFormCategorie.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>📁 Nouvelle catégorie</h3>
+        <button (click)="showFormCategorie.set(false)">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="frow">
+          <label>Nom de la catégorie *</label>
+          <input type="text" placeholder="Ex: Spécialités" [(ngModel)]="newCategorie" />
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="showFormCategorie.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="ajouterCategorie()">✅ Créer</button>
+      </div>
+    </div>
+  </div>
+}

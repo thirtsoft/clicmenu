@@ -1,0 +1,72 @@
+.periode-selector {
+  display: inline-flex;
+  background: white;
+  padding: 4px;
+  border-radius: 40px;
+  border: 1px solid #F5E6DC;
+  box-shadow: 0 2px 8px rgba(193, 101, 74, 0.05);
+  width: fit-content;
+}
+
+.periode-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 40px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #8C7B72;
+  white-space: nowrap;
+}
+
+.periode-btn:hover {
+  color: #C1654A;
+  background: #FDF4F1;
+}
+
+.periode-btn.active {
+  background: linear-gradient(135deg, #E8856A, #C1654A);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(193, 101, 74, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .periode-selector {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .periode-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .periode-btn {
+    padding: 8px 8px;
+    font-size: 12px;
+  }
+}
+
+/* Support mobile avec peu d'espace */
+@media (max-width: 360px) {
+  .periode-selector {
+    flex-wrap: wrap;
+    border-radius: 12px;
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .periode-btn {
+    flex: 1 1 calc(50% - 4px);
+    border-radius: 8px;
+  }
+}

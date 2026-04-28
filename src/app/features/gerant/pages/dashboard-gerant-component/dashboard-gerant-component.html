@@ -1,0 +1,89 @@
+<!-- apercu-gerant.html -->
+<div class="apercu-content">
+
+  <!-- En-tête -->
+  <div class="content-header">
+    <div>
+      <h2>📊 Tableau de bord</h2>
+      <p>Vue d'ensemble des opérations</p>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-4">
+    @for (k of kpis(); track k.label) {
+      <div class="kpi-card" [class]="'kc-' + k.cls">
+        <div class="kc-top">
+          <span class="kc-ico">{{ k.ico }}</span>
+          <span class="kc-var" [class.pos]="k.var > 0" [class.neg]="k.var < 0">
+            {{ k.var > 0 ? '↑ +' + k.var : k.var < 0 ? '↓ ' + k.var : '—' }}%
+          </span>
+        </div>
+        <div class="kc-val">{{ k.val }}</div>
+        <div class="kc-lbl">{{ k.label }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- Ventes + Livraisons -->
+  <div class="duo-grid">
+
+    <!-- Graphe ventes par heure -->
+    <div class="card">
+      <div class="card-head">
+        <h3>Ventes par heure</h3>
+      </div>
+      <div class="bar-chart">
+        @for (v of ds.ventesHeure; track v.heure) {
+          <div class="bc-col">
+            <span class="bc-amount">{{ fmtK(v.ventes) }}</span>
+            <div class="bc-bar-outer">
+              <div class="bc-bar-inner" [style.height.%]="barHeight(v.ventes)"></div>
+            </div>
+            <span class="bc-lbl">{{ v.heure }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Mini liste livraisons -->
+    <div class="card">
+      <div class="card-head">
+        <h3>Livraisons <span class="badge info">{{ ds.livraisons.length }}</span></h3>
+      </div>
+      @for (l of ds.livraisons; track l.id) {
+        <div class="lm-row">
+          <div class="lm-dot" [class]="statLiv(l).cls"></div>
+          <div class="lm-info">
+            <span>{{ l.livreurNom }}</span>
+            <small>{{ l.zone }}</small>
+          </div>
+          <div class="lm-right">
+            <span>{{ l.commandes }} cmd</span>
+            <span class="badge" [class]="statLiv(l).cls">{{ statLiv(l).label }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- Production rapide -->
+  <div class="card">
+    <div class="card-head">
+      <h3>Production du jour</h3>
+      <button class="card-link" (click)="voirProduction()">Voir tout →</button>
+    </div>
+    @for (p of ds.productions; track p.id) {
+      <div class="pr-item">
+        <span class="pr-nom">{{ p.produit }}</span>
+        <div class="pr-bar">
+          <div class="pr-fill" [class]="statProd(p).cls" [style.width.%]="pctProd(p)"></div>
+        </div>
+        <span class="pr-pct">{{ pctProd(p) }}%</span>
+        <span class="badge" [class]="statProd(p).cls">{{ statProd(p).label }}</span>
+      </div>
+    }
+  </div>
+
+</div>

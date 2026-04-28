@@ -1,0 +1,213 @@
+<div class="finances-container">
+  <!-- ══════════ RÉSUMÉ FINANCIER ══════════ -->
+  <div class="kpis-grid">
+    <div class="kpi-card kc-vert">
+      <div class="kc-top">
+        <span class="kc-ico">💰</span>
+        <span class="kc-var pos"
+          >{{ getTendanceIco(resume().tendance) }} {{ resume().evolution }}%</span
+        >
+      </div>
+      <div class="kc-val">{{ formatCFAFull(resume().chiffreAffaires) }}</div>
+      <div class="kc-lbl">Chiffre d'affaires</div>
+    </div>
+
+    <div class="kpi-card kc-rose">
+      <div class="kc-top">
+        <span class="kc-ico">📤</span>
+      </div>
+      <div class="kc-val">{{ formatCFAFull(resume().depenses) }}</div>
+      <div class="kc-lbl">Dépenses totales</div>
+    </div>
+
+    <div class="kpi-card kc-or">
+      <div class="kc-top">
+        <span class="kc-ico">📊</span>
+      </div>
+      <div class="kc-val">{{ formatCFAFull(resume().benefice) }}</div>
+      <div class="kc-lbl">Bénéfice net</div>
+    </div>
+
+    <div class="kpi-card kc-violet">
+      <div class="kc-top">
+        <span class="kc-ico">📈</span>
+      </div>
+      <div class="kc-val">{{ resume().marge }}%</div>
+      <div class="kc-lbl">Marge bénéficiaire</div>
+    </div>
+  </div>
+
+  <!-- ══════════ FILTRES PÉRIODE ══════════ -->
+  <div class="chips-row">
+    <button [class.active]="periode() === 'jour'" (click)="setPeriode('jour')">Aujourd'hui</button>
+    <button [class.active]="periode() === 'semaine'" (click)="setPeriode('semaine')">
+      Cette semaine
+    </button>
+    <button [class.active]="periode() === 'mois'" (click)="setPeriode('mois')">Ce mois</button>
+    <button [class.active]="periode() === 'annee'" (click)="setPeriode('annee')">
+      Cette année
+    </button>
+  </div>
+
+  <!-- ══════════ GRILLE ANALYTIQUE ══════════ -->
+  <div class="charts-grid">
+    <!-- Recettes par catégorie -->
+    <div class="card chart-card">
+      <h3 class="chart-title">📥 Recettes par catégorie</h3>
+      <div class="categories-list">
+        @for (r of recettesCategories(); track r.categorie) {
+          <div class="cat-item">
+            <div class="cat-header">
+              <span class="cat-ico">{{ r.icone }}</span>
+              <span class="cat-nom">{{ r.categorie }}</span>
+              <span class="cat-pct">{{ r.pourcentage }}%</span>
+            </div>
+            <div class="cat-bar-wrapper">
+              <div class="cat-bar recette" [style.width.%]="r.pourcentage"></div>
+            </div>
+            <span class="cat-montant">{{ formatCFAFull(r.montant) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Dépenses par catégorie -->
+    <div class="card chart-card">
+      <h3 class="chart-title">📤 Dépenses par catégorie</h3>
+      <div class="categories-list">
+        @for (d of depensesCategories(); track d.categorie) {
+          <div class="cat-item">
+            <div class="cat-header">
+              <span class="cat-ico">{{ d.icone }}</span>
+              <span class="cat-nom">{{ d.categorie }}</span>
+              <span class="cat-pct">{{ d.pourcentage }}%</span>
+            </div>
+            <div class="cat-bar-wrapper">
+              <div
+                class="cat-bar depense"
+                [class]="getBarColor(d.montant / d.budget)"
+                [style.width.%]="(d.montant / depensesMax()) * 100"
+              ></div>
+            </div>
+            <div class="cat-details">
+              <span class="cat-montant">{{ formatCFAFull(d.montant) }}</span>
+              <span class="cat-budget">Budget: {{ formatCFAFull(d.budget) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ FLUX DE TRÉSORERIE ══════════ -->
+  <div class="card chart-card">
+    <h3 class="chart-title">💵 Flux de trésorerie</h3>
+    <div class="flux-chart">
+      @for (f of fluxTresorerie(); track f.jour) {
+        <div class="flux-column">
+          <div class="flux-bars">
+            <div
+              class="flux-bar recette"
+              [style.height.%]="(f.recettes / 500000) * 100"
+              title="Recettes"
+            ></div>
+            <div
+              class="flux-bar depense"
+              [style.height.%]="(f.depenses / 500000) * 100"
+              title="Dépenses"
+            ></div>
+          </div>
+          <span class="flux-label">{{ f.jour }}</span>
+        </div>
+      }
+    </div>
+    <div class="flux-legend">
+      <div class="legend-item">
+        <span class="legend-color recette"></span>
+        <span>Recettes</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color depense"></span>
+        <span>Dépenses</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ TRANSACTIONS ══════════ -->
+  <div class="card">
+    <div class="card-head">
+      <h3>🧾 Historique des transactions</h3>
+      <div class="card-head-actions">
+        <div class="search-bar-transaction">
+          <span>🔍</span>
+          <input
+            type="text"
+            placeholder="Rechercher..."
+            [ngModel]="searchTransaction()"
+            (ngModelChange)="searchTransaction.set($event)"
+          />
+        </div>
+        <div class="filter-buttons">
+          <button [class.active]="filtreType() === 'tous'" (click)="setFiltreType('tous')">
+            Tous
+          </button>
+          <button [class.active]="filtreType() === 'recette'" (click)="setFiltreType('recette')">
+            📥 Recettes
+          </button>
+          <button [class.active]="filtreType() === 'depense'" (click)="setFiltreType('depense')">
+            📤 Dépenses
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="transactions-table-wrapper">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Catégorie</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Paiement</th>
+            <th>Référence</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of transactionsFiltrees(); track t.id) {
+            <tr class="transaction-row">
+              <td>
+                <span class="tr-date">{{ t.date }}</span>
+              </td>
+              <td>
+                <div class="tr-desc">
+                  <span class="tr-description">{{ t.description }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="tr-categorie">{{ t.categorie }}</span>
+              </td>
+              <td>
+                <span class="tr-type" [class]="getTypeCls(t.type)">
+                  {{ getTypeIco(t.type) }} {{ t.type === 'recette' ? 'Recette' : 'Dépense' }}
+                </span>
+              </td>
+              <td>
+                <span class="tr-montant" [class]="t.type === 'recette' ? 'positif' : 'negatif'">
+                  {{ t.type === 'recette' ? '+' : '-' }}{{ formatCFAFull(t.montant) }}
+                </span>
+              </td>
+              <td>
+                <span class="tr-paiement">{{ t.modePaiement }}</span>
+              </td>
+              <td>
+                <span class="tr-reference">{{ t.reference }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

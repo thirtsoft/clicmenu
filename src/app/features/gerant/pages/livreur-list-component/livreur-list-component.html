@@ -1,0 +1,171 @@
+<!-- ────────── VUE LIVREURS ────────── -->
+@if (vue() === 'livreurs') {
+  <div class="gd-content">
+    <div class="content-header">
+      <div>
+        <h2>👷 Équipe de livraison</h2>
+        <p>{{ livreursActifs() }} livreurs actifs sur {{ livreurs().length }}</p>
+      </div>
+        <button class="btn-primary" (click)="showFormLivreur.set(true)">+ Nouveau livreur</button>
+      </div>
+
+    <div class="kpis-4">
+      <div class="kpi-card kc-or">
+        <div class="kc-top"><span class="kc-ico">👷</span></div>
+        <div class="kc-val">{{ livreurs().length }}</div>
+        <div class="kc-lbl">Total équipe</div>
+      </div>
+      <div class="kpi-card kc-vert">
+        <div class="kc-top"><span class="kc-ico">✅</span></div>
+        <div class="kc-val">{{ livreursActifs() }}</div>
+        <div class="kc-lbl">Actifs</div>
+      </div>
+      <div class="kpi-card kc-rose">
+        <div class="kc-top"><span class="kc-ico">📦</span></div>
+        <div class="kc-val">{{ totalCmdEquipe() }}</div>
+        <div class="kc-lbl">Cmd aujourd'hui</div>
+      </div>
+      <div class="kpi-card kc-or">
+        <div class="kc-top"><span class="kc-ico">💰</span></div>
+        <div class="kc-val" style="font-size: 13px">{{ fmtCFA(totalMontantEquipe()) }}</div>
+        <div class="kc-lbl">Montant collecté</div>
+      </div>
+    </div>
+
+    <div class="chips-row">
+      <button [class.active]="filtreStatut() === 'tous'" (click)="setFiltreStatut('tous')">
+        Tous
+      </button>
+      <button [class.active]="filtreStatut() === 'actif'" (click)="setFiltreStatut('actif')">
+        Actifs
+      </button>
+      <button [class.active]="filtreStatut() === 'en_conge'" (click)="setFiltreStatut('en_conge')">
+        En congé
+      </button>
+      <button [class.active]="filtreStatut() === 'inactif'" (click)="setFiltreStatut('inactif')">
+        Inactifs
+      </button>
+    </div>
+
+    <div class="livreurs-grid">
+      @for (lr of livreursFiltres(); track lr.id) {
+        <div class="lr-card card">
+          <div class="lrc-top">
+            <div class="lrc-ava">{{ initiales(lr) }}</div>
+            <div class="lrc-info">
+              <span class="lrc-nom">{{ lr.prenom }} {{ lr.nom }}</span>
+              <span class="lrc-zone">📍 {{ lr.zone }}</span>
+            </div>
+            <span class="badge" [class]="statLivreur(lr.statut).cls">{{
+              statLivreur(lr.statut).label
+            }}</span>
+          </div>
+          <div class="lrc-details">
+            <div>
+              <span>📞</span><span>{{ lr.telephone }}</span>
+            </div>
+            <div>
+              <span>🏍️</span><span>{{ lr.moto }}</span>
+            </div>
+            <div>
+              <span>📅</span><span>Depuis {{ lr.dateEmbauche }}</span>
+            </div>
+          </div>
+          <div class="lrc-kpis">
+            <div class="lrk">
+              <span class="lrk-v">{{ lr.commandesToday }}</span>
+              <span class="lrk-l">Cmd aujourd'hui</span>
+            </div>
+            <div class="lrk">
+              <span class="lrk-v" [style.font-size]="lr.montantToday > 0 ? '13px' : '20px'">
+                {{ lr.montantToday > 0 ? fmtCFA(lr.montantToday) : '—' }}
+              </span>
+              <span class="lrk-l">Montant collecté</span>
+            </div>
+          </div>
+          <div class="lrc-actions">
+            <button class="btn-secondary btn-sm" (click)="toggleStatut(lr)">
+              {{ lr.statut === 'actif' ? '⏸ Congé' : '▶ Activer' }}
+            </button>
+            <button class="btn-secondary btn-sm">✏️ Modifier</button>
+            <button class="btn-danger btn-sm" (click)="supprimerLivreur(lr.id)">🗑</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (showFormLivreur()) {
+  <div class="modal-bg" (click)="showFormLivreur.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="mb-head">
+        <h3>👷 Nouveau livreur</h3>
+        <button (click)="showFormLivreur.set(false)">✕</button>
+      </div>
+      <div class="mb-form">
+        <div class="f2">
+          <div class="frow">
+            <label>Prénom *</label>
+            <input
+              type="text"
+              [ngModel]="newLivreur().prenom"
+              (ngModelChange)="setNouveauPrenom($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Nom *</label>
+            <input
+              type="text"
+              [ngModel]="newLivreur().nom"
+              (ngModelChange)="setNouveauNom($event)"
+            />
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Téléphone *</label>
+            <input
+              type="tel"
+              placeholder="+221 77…"
+              [ngModel]="newLivreur().telephone"
+              (ngModelChange)="setNouveauTelephone($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Zone</label>
+            <select [ngModel]="newLivreur().zone" (ngModelChange)="setNouveauZone($event)">
+              <option value="">-- Choisir --</option>
+              @for (z of zones; track z) {
+                <option [value]="z">{{ z }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="f2">
+          <div class="frow">
+            <label>Moto / Véhicule</label>
+            <input
+              type="text"
+              placeholder="Honda CB 125…"
+              [ngModel]="newLivreur().moto"
+              (ngModelChange)="setNouveauMoto($event)"
+            />
+          </div>
+          <div class="frow">
+            <label>Date d'embauche</label>
+            <input
+              type="date"
+              [ngModel]="newLivreur().dateEmbauche"
+              (ngModelChange)="setNouveauDateEmbauche($event)"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="mb-actions">
+        <button class="btn-secondary" (click)="showFormLivreur.set(false)">Annuler</button>
+        <button class="btn-primary" (click)="ajouterLivreur()">✅ Créer le profil</button>
+      </div>
+    </div>
+  </div>
+}

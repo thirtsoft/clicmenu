@@ -1,0 +1,70 @@
+<aside class="sidebar" [class.collapsed]="collapsed()" [class.open]="open()">
+  <!-- Brand / Logo -->
+  <div class="sidebar-brand">
+    <div class="brand-logo">🍽️</div>
+    @if (!collapsed()) {
+      <div class="brand-text">
+        <span class="brand-name">ClicMenu</span>
+        <span class="brand-sub">Restaurant</span>
+      </div>
+    }
+    <button
+      class="brand-toggle"
+      (click)="toggleCollapse.emit()"
+      [attr.aria-label]="collapsed() ? 'Développer' : 'Réduire'"
+    >
+      {{ collapsed() ? '→' : '←' }}
+    </button>
+  </div>
+
+  <!-- Profile utilisateur -->
+
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.id) {
+      <a
+        class="nav-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        (click)="close.emit()"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        @if (!collapsed()) {
+          <span class="nav-label">{{ item.label }}</span>
+          @if (item.badge) {
+            <span class="nav-badge">{{ item.badge }}</span>
+          }
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Footer avec statistiques rapides -->
+  @if (!collapsed()) {
+    <div class="sidebar-footer">
+      <div class="footer-stat">
+        <span class="stat-value">{{ nbEmployes() }}</span>
+        <span class="stat-label">Employés</span>
+      </div>
+      <div class="footer-stat">
+        <span class="stat-value">{{ nbTables() }}</span>
+        <span class="stat-label">Tables</span>
+      </div>
+    </div>
+  }
+
+  <!-- Footer — Déconnexion -->
+  <div class="sb-footer">
+    <button class="sb-deconnexion" (click)="deconnecter()">
+      <span class="sb-ico">🔓</span>
+      <span class="sb-label">Déconnexion</span>
+    </button>
+  </div>
+
+  <!-- Version mobile : bouton fermeture -->
+  @if (open()) {
+    <button class="sidebar-close" (click)="close.emit()" aria-label="Fermer le menu">✕</button>
+  }
+</aside>

@@ -1,0 +1,51 @@
+<aside class="vd-sidebar" [class.is-open]="isOpen()">
+  <button class="sidebar-close" (click)="close.emit()">✕</button>
+
+  <div class="vs-brand">
+    <div class="vs-logo">🍽️</div>
+    <div>
+      <div class="vs-nom">ClicMenu</div>
+      <div class="vs-sub">Restaurant</div>
+    </div>
+  </div>
+
+  <div class="vs-profil">
+    <div class="vs-ava">A</div>
+    <div>
+      <div class="vs-pnom">Aminata Diallo</div>
+      <div class="vs-role">Vendeuse · Plateau</div>
+    </div>
+  </div>
+
+  <div class="vs-kpis">
+    <div class="vsk-card">
+      <span class="vsk-val">{{ fmtCFA(ventesJour()) }}</span>
+      <span class="vsk-lbl">Ventes du jour</span>
+    </div>
+    <div class="vsk-row">
+      <div class="vsk-pill"><span>📋</span>{{ commandesJour() }} cmd</div>
+      <div class="vsk-pill"><span>👥</span>{{ clientsJour() }} clients</div>
+    </div>
+  </div>
+
+  <nav class="vs-nav">
+    @for (item of navItems(); track item.id) {
+      <button
+        class="vsn-item"
+        [class.active]="vueActive() === item.id"
+        (click)="navigate.emit(item.id)"
+      >
+        <span class="vsn-ico">{{ item.ico }}</span>
+        <span>{{ item.label }}</span>
+      </button>
+    }
+  </nav>
+
+  <!-- Footer — Déconnexion -->
+  <div class="sb-footer">
+    <button class="sb-deconnexion" (click)="deconnecter()">
+      <span class="sb-ico">🔓</span>
+      <span class="sb-label">Déconnexion</span>
+    </button>
+  </div>
+</aside>
