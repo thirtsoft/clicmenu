@@ -24,23 +24,6 @@ export class MainLayoutGerantCompoment {
 
   readonly router = inject(Router);
 
-  /*
-  nav: NavItem[] = [
-    { route: '/gerant/dashboard', ico: '📊', label: 'Aperçu' },
-    { route: '/gerant/livreurs', ico: '👷', label: 'Livreurs' },
-    { route: '/gerant/livraison', ico: '🚚', label: 'Livraisons' },
-    { route: '/gerant/production', ico: '🏭', label: 'Production' },
-    { route: '/gerant/ventes', ico: '💰', label: 'Ventes' },
-    { route: '/gerant/commandes', ico: '📦', label: 'Commandes' },
-    { route: '/gerant/passser-une-commande', ico: '🏪', label: 'Passser une ommandes' },
-    { route: '/gerant/retours', ico: '🏪', label: 'Retours' },
-    { route: '/gerant/enregistrer-un-retour', ico: '🏪', label: 'Enregistrer un retour' },
-    { route: '/gerant/personnels', ico: '👤', label: 'Personnels' },
-    { route: '/gerant/depenses', ico: '💼', label: 'Dépenses' },
-    { route: '/gerant/historique-commandes', ico: '📜', label: 'Historique commandes' },
-
-  ]; */
-
   nav: NavItem[] = [
     { route: '/gerant/dashboard', ico: '📊', label: 'Aperçu' },
     { route: '/gerant/commandes', ico: '📋', label: 'Commandes' },
