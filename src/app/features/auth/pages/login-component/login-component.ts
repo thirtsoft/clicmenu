@@ -29,7 +29,7 @@ export class LoginComponent {
   ];
 
   stats = [
-    { val: '4', lbl: 'Boulangeries' },
+    { val: '4', lbl: 'Restaurants' },
     { val: '3', lbl: 'Rôles' },
     { val: '24/7', lbl: 'Disponible' },
     { val: '🇸🇳', lbl: 'Dakar' },

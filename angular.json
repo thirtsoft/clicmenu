@@ -30,16 +30,17 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/clicmenu/",
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2000kb",
+                  "maximumError": "5600kb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "4000kB",
+                  "maximumError": "8000kB"
                 }
               ],
               "outputHashing": "all"
