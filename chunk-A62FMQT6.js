@@ -1,0 +1,1 @@
+import{Da as o,Ya as n,Za as s,nb as i}from"./chunk-R2GNRBGA.js";var p=class e{static \u0275fac=function(t){return new(t||e)};static \u0275cmp=o({type:e,selectors:[["app-stock-list-component"]],decls:2,vars:0,template:function(t,a){t&1&&(n(0,"p"),i(1,"stock-list-component works!"),s())},encapsulation:2})};export{p as StockListComponent};

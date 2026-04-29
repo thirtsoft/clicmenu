@@ -1,0 +1,1 @@
+import{Da as t,Ya as o,Za as s,nb as p}from"./chunk-R2GNRBGA.js";var i=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=t({type:n,selectors:[["app-personnels-list-component"]],decls:2,vars:0,template:function(e,a){e&1&&(o(0,"p"),p(1,"personnels-list-component works!"),s())},encapsulation:2})};export{i as PersonnelsListComponent};

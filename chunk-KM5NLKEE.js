@@ -1,0 +1,1 @@
+import{Da as n,Ya as o,Za as s,nb as a}from"./chunk-R2GNRBGA.js";var i=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=n({type:t,selectors:[["app-tables-list-component"]],decls:2,vars:0,template:function(e,l){e&1&&(o(0,"p"),a(1,"tables-list-component works!"),s())},encapsulation:2})};export{i as TablesListComponent};

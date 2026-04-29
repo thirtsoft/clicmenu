@@ -1,0 +1,1 @@
+import{Da as t,Ya as o,Za as i,nb as m}from"./chunk-R2GNRBGA.js";var s=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=t({type:n,selectors:[["app-menu-list-component"]],decls:2,vars:0,template:function(e,a){e&1&&(o(0,"p"),m(1,"menu-list-component works!"),i())},encapsulation:2})};export{s as MenuListComponent};
