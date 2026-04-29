@@ -145,8 +145,8 @@ export class PasserUneCommandeComponent {
 
   // Filtres produits
   categorieProduit = signal<string>('Tout');
-  categoriesProduitsVente = ['Tout', 'pain', 'viennoiserie', 'patisserie', 'sandwich'];
-  categoriesMatiere = ['Tout', 'farine', 'levure', 'beurre', 'oeufs', 'sucre', 'sel', 'autre'];
+  categoriesProduitsVente = ['Tout', 'plat', 'entrée', 'accompagnement', 'dessert', 'boisson'];
+  categoriesMatiere = ['Tout', 'viande', 'legume', 'epicerie', 'cremerie', 'boulangerie'];
 
   produitsFiltres = computed(() => {
     const search = this.searchTerm().toLowerCase();

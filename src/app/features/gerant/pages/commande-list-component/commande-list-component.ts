@@ -51,71 +51,73 @@ export class CommandeListComponent {
   commandes = signal<GerantCommande[]>([
     {
       id: 'CMD001',
-      date: new Date(2024, 2, 15, 10, 30),
+      date: new Date(2024, 2, 15, 12, 30),
       type: 'livreur',
       destinataire: 'Moussa Thiaw',
       produits: [
-        { nom: 'Baguette tradition', quantite: 50, prix: 500 },
-        { nom: 'Croissant', quantite: 30, prix: 450 },
-        { nom: 'Pain au chocolat', quantite: 20, prix: 500 }
+        { nom: 'Burger Classique', quantite: 4, prix: 8500 },
+        { nom: 'Frites Maison', quantite: 4, prix: 2500 },
+        { nom: 'Soda 33cl', quantite: 4, prix: 1500 }
       ],
-      total: 48500,
+      total: 50000,
       statut: 'en_attente',
-      note: ''
+      note: 'Sans oignons pour un burger'
     },
     {
       id: 'CMD002',
-      date: new Date(2024, 2, 15, 9, 15),
+      date: new Date(2024, 2, 15, 13, 15),
       type: 'livreur',
       destinataire: 'Ibrahima Sow',
       produits: [
-        { nom: 'Baguette complète', quantite: 40, prix: 600 },
-        { nom: 'Palmier', quantite: 25, prix: 400 }
+        { nom: 'Salade César', quantite: 2, prix: 5500 },
+        { nom: 'Vin Rouge (Verre)', quantite: 2, prix: 4000 }
       ],
-      total: 34000,
+      total: 19000,
       statut: 'en_attente',
-      note: ''
+      note: 'Sauce à part'
     },
     {
       id: 'CMD003',
-      date: new Date(2024, 2, 14, 14, 0),
+      date: new Date(2024, 2, 14, 10, 0),
       type: 'fournisseur',
-      destinataire: 'Grands Moulins de Dakar',
+      destinataire: 'Boucherie du Littoral',
       produits: [
-        { nom: 'Farine T55', quantite: 100, prix: 650 },
-        { nom: 'Levure fraîche', quantite: 20, prix: 4500 }
+        { nom: 'Filet de bœuf', quantite: 15, prix: 15000 },
+        { nom: 'Blanc de poulet', quantite: 10, prix: 5500 }
       ],
-      total: 155000,
+      total: 280000,
       statut: 'validee',
-      note: 'Livraison prévue le 20 mars'
+      note: 'Livraison prévue demain matin'
     },
     {
       id: 'CMD004',
-      date: new Date(2024, 2, 14, 11, 45),
+      date: new Date(2024, 2, 14, 15, 45),
       type: 'fournisseur',
-      destinataire: 'Société Laitière du Sénégal',
+      destinataire: 'Grossiste Maraîcher',
       produits: [
-        { nom: 'Beurre 84%', quantite: 30, prix: 5200 },
-        { nom: 'Oeufs frais', quantite: 15, prix: 3500 }
+        { nom: 'Pommes de terre', quantite: 100, prix: 800 },
+        { nom: 'Tomates grappe', quantite: 20, prix: 1200 },
+        { nom: 'Oignons jaunes', quantite: 10, prix: 600 }
       ],
-      total: 208500,
+      total: 110000,
       statut: 'livree',
-      note: 'Livré avec succès'
+      note: 'Vérifier la qualité des tomates à réception'
     },
     {
       id: 'CMD005',
-      date: new Date(2024, 2, 13, 8, 30),
+      date: new Date(2024, 2, 13, 20, 30),
       type: 'livreur',
       destinataire: 'Omar Faye',
       produits: [
-        { nom: 'Pain de campagne', quantite: 25, prix: 800 },
-        { nom: 'Éclair au chocolat', quantite: 15, prix: 650 }
+        { nom: 'Pâtes Carbonara', quantite: 3, prix: 7000 },
+        { nom: 'Tiramisu', quantite: 3, prix: 3500 }
       ],
-      total: 29750,
+      total: 31500,
       statut: 'annulee',
-      note: 'Annulé sur demande du client'
+      note: 'Annulé : erreur de zone de livraison'
     }
   ]);
+
 
   // Commandes filtrées
   commandesFiltrees = computed(() => {

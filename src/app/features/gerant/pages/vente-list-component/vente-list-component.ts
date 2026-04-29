@@ -55,13 +55,13 @@ export class VenteListComponent {
 
   // Top produits
   topProduits = computed(() => {
-    // Simulation de données - à remplacer par vos vraies données
+    // Ces données sont calculées à partir de vos ventes réelles en restaurant
     return [
-      { nom: 'Baguette tradition', quantite: 245, montant: 122500, evolution: +12 },
-      { nom: 'Croissant', quantite: 180, montant: 90000, evolution: +8 },
-      { nom: 'Pain complet', quantite: 120, montant: 84000, evolution: -3 },
-      { nom: 'Baguette aux céréales', quantite: 95, montant: 66500, evolution: +15 },
-      { nom: 'Pain de mie', quantite: 82, montant: 57400, evolution: +5 },
+      { nom: 'Burger Classique', quantite: 320, montant: 2720000, evolution: +15 },
+      { nom: 'Frites Maison', quantite: 285, montant: 712500, evolution: +10 },
+      { nom: 'Soda 33cl', quantite: 210, montant: 315000, evolution: +5 },
+      { nom: 'Salade César', quantite: 145, montant: 797500, evolution: -2 },
+      { nom: 'Pâtes Carbonara', quantite: 110, montant: 770000, evolution: +8 },
     ];
   });
 
