@@ -49,6 +49,7 @@ export class SideBarGerantComponent {
     { route: '/gerant/cuisine', ico: '👨‍🍳', label: 'Cuisine' },
     { route: '/gerant/stocks', ico: '📦', label: 'Stocks' },
     { route: '/gerant/ventes', ico: '💰', label: 'Ventes' },
+    { route: '/gerant/livreurs', ico: '👷', label: 'Livreurs' },
     { route: '/gerant/personnels', ico: '👥', label: 'Personnel' },
     //  { route: '/gerant/depenses', ico: '💼', label: 'Dépenses' },
     //  { route: '/gerant/fournisseurs', ico: '🚛', label: 'Fournisseurs' },

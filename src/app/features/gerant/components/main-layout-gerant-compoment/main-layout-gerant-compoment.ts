@@ -32,6 +32,7 @@ export class MainLayoutGerantCompoment {
     { route: '/gerant/cuisine', ico: '👨‍🍳', label: 'Cuisine' },
     { route: '/gerant/stocks', ico: '📦', label: 'Stocks' },
     { route: '/gerant/ventes', ico: '💰', label: 'Ventes' },
+    { route: '/gerant/livreurs', ico: '👷', label: 'Livreurs' },
     { route: '/gerant/personnels', ico: '👥', label: 'Personnel' },
     //  { route: '/gerant/depenses', ico: '💼', label: 'Dépenses' },
     //  { route: '/gerant/fournisseurs', ico: '🚛', label: 'Fournisseurs' },
@@ -51,6 +52,7 @@ export class MainLayoutGerantCompoment {
     if (url.includes('ventes')) return 'Ventes';
     if (url.includes('commandes')) return 'Commandes';
     if (url.includes('cuisine')) return 'Cuisine';
+    if (url.includes('livreurs')) return 'Livreurs';
     if (url.includes('personnels')) return 'Personnels';
 
     return 'Gérant';
